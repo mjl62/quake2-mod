@@ -764,14 +764,15 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	float	damage_radius;
 	int		radius_damage;
 
-	damage = 100 + (int)(random() * 20.0);
-	radius_damage = 120;
-	damage_radius = 120;
+	damage = 100 + (int)(random() * 20.0); // was 100
+	radius_damage = 120; // was 120
+	damage_radius = 120; // was 120
 	if (is_quad)
 	{
 		damage *= 4;
 		radius_damage *= 4;
 	}
+	
 
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
 
@@ -780,7 +781,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_rocket (ent, start, forward, damage, 650, damage_radius, radius_damage);
+	fire_rocket (ent, start, forward, damage, 650, damage_radius, radius_damage); // speed was 650
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -818,29 +819,46 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	vec3_t	forward, right;
 	vec3_t	start;
 	vec3_t	offset;
-
+	
 	if (is_quad)
 		damage *= 4;
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-	VectorSet(offset, 24, 8, ent->viewheight-8);
-	VectorAdd (offset, g_offset, offset);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+	AngleVectors(ent->client->v_angle, forward, right, NULL);
+	VectorSet(offset, 24, 8, ent->viewheight - 8);
+	VectorAdd(offset, g_offset, offset);
+	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
+	if (ent->client->pers.hand != 2) {
+		VectorScale(forward, -2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -1;
 
-	fire_blaster (ent, start, forward, damage, 1000, effect, hyper);
+		fire_blaster(ent, start, forward, damage, 1000, effect, hyper);
 
-	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	if (hyper)
-		gi.WriteByte (MZ_HYPERBLASTER | is_silenced);
-	else
-		gi.WriteByte (MZ_BLASTER | is_silenced);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
+		// send muzzle flash
+		gi.WriteByte(svc_muzzleflash);
+		gi.WriteShort(ent - g_edicts);
+		if (hyper)
+			gi.WriteByte(MZ_HYPERBLASTER | is_silenced);
+		else
+			gi.WriteByte(MZ_BLASTER | is_silenced);
+		gi.multicast(ent->s.origin, MULTICAST_PVS);
 
-	PlayerNoise(ent, start, PNOISE_WEAPON);
+		PlayerNoise(ent, start, PNOISE_WEAPON);
+	}
+	else {
+		trace_t Interact;
+		vec3_t end;
+		end[0] = 0;
+		end[1] = 0;
+		end[2] = 1;
+		
+		Interact = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
+		if (Interact.fraction != 1.0) {
+			gi.centerprintf(ent, Interact.ent->classname);
+		}
+		else {
+			gi.centerprintf(ent, "Nothin");
+		}
+	}
 }
 
 
@@ -1186,8 +1204,8 @@ void weapon_shotgun_fire (edict_t *ent)
 	vec3_t		start;
 	vec3_t		forward, right;
 	vec3_t		offset;
-	int			damage = 4;
-	int			kick = 8;
+	int			damage = 4; // was 4
+	int			kick = 8; // was 8
 
 	if (ent->client->ps.gunframe == 9)
 	{
@@ -1195,8 +1213,8 @@ void weapon_shotgun_fire (edict_t *ent)
 		return;
 	}
 
+	// HERE FOR LOOK DIR MATTHEW LIDONNI
 	AngleVectors (ent->client->v_angle, forward, right, NULL);
-
 	VectorScale (forward, -2, ent->client->kick_origin);
 	ent->client->kick_angles[0] = -2;
 
@@ -1208,11 +1226,16 @@ void weapon_shotgun_fire (edict_t *ent)
 		damage *= 4;
 		kick *= 4;
 	}
+	// Custom code Matthew LiDonni
+	int hspread = 500; // was 500
+	int vspread = 500; // was 500
+
+	// End custom code
 
 	if (deathmatch->value)
 		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
 	else
-		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+		fire_shotgun (ent, start, forward, damage, kick, hspread, vspread, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);

@@ -855,9 +855,6 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		if (Interact.fraction != 1.0) {
 			gi.centerprintf(ent, Interact.ent->classname);
 		}
-		else {
-			gi.centerprintf(ent, "Nothin");
-		}
 	}
 }
 

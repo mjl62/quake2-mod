@@ -831,14 +831,14 @@ typedef struct {
 	int			questNum;
 	qboolean	queststarted;
 	qboolean	questcompleted;
-	char		questname[32];
-	char		questdesc[64];
+	char		questname[16];
+	char		questdesc[32];
 	char		introdiag[128];
-	char		inprogressdiag[128];
-	char		completediag[128];
-	char		postdiag[128];
+	char		inprogressdiag[64];
+	char		completediag[64];
+	char		postdiag[64];
 
-	char		killclassname[16];
+	char		killclassname[32];
 	int			kills;
 	int			killsneeded;
 	int			rewardXP;

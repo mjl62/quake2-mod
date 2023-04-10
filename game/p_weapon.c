@@ -366,6 +366,40 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[index]--;
 }
 
+void Interact(edict_t* ent, vec3_t start) {
+
+	trace_t Interact;
+	vec3_t end;
+	end[0] = 0;
+	end[1] = 0;
+	end[2] = 1;
+
+	Interact = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
+	if (Interact.fraction != 1.0 && Interact.ent->classname == "questgiver") {
+		if (ent->client->pers.questlog[Interact.ent->questNum].queststarted != true) {
+			ent->client->pers.questlog[Interact.ent->questNum] = getQuest(Interact.ent->questNum);
+			gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].introdiag);
+
+		}
+		else if (ent->client->pers.questlog[Interact.ent->questNum].questcompleted == false) {
+			// CHECK IF QUEST COMPLETE: 
+			if (ent->client->pers.questlog[Interact.ent->questNum].kills >= ent->client->pers.questlog[Interact.ent->questNum].killsneeded) // ADD OR FOR AN OBJECTIVE BEING COMPLETE
+			{
+				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].completediag);
+				ent->client->pers.questlog[Interact.ent->questNum].questcompleted = true;
+			}
+			else {
+				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].inprogressdiag);
+			}
+		}
+		else if (ent->client->pers.questlog[Interact.ent->questNum].questcompleted == true) {
+			gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].postdiag);
+		}
+		else {
+			gi.bprintf(PRINT_CHAT, "Something went wrong with the quest interaction...\n");
+		}
+	}
+}
 
 /*
 ================
@@ -782,7 +816,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_rocket (ent, start, forward, damage, 650, damage_radius, radius_damage); // speed was 650
+	fire_rocket (ent, start, forward, damage, 400, damage_radius, radius_damage); // speed was 650
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -828,6 +862,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 	VectorAdd(offset, g_offset, offset);
 	P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
+	// If weapon not holstered
 	if (ent->client->pers.hand != 2) {
 		VectorScale(forward, -2, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -1;
@@ -846,47 +881,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		PlayerNoise(ent, start, PNOISE_WEAPON);
 	}
 	else {
-		trace_t Interact;
-		vec3_t end;
-		end[0] = 0;
-		end[1] = 0;
-		end[2] = 1;
-		
-		Interact = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
-		if (Interact.fraction != 1.0 && Interact.ent->classname == "questgiver") {
-			if (ent->client->pers.questlog[Interact.ent->questNum].queststarted != true) {
-				ent->client->pers.questlog[Interact.ent->questNum] = getQuest(Interact.ent->questNum);
-				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].introdiag);
-			//if (Interact.ent->questNum == 0 && ent->client->pers.questlog[0].queststarted != true) {
-				//ent->client->pers.questlog[0] = getQuest(0);
-				//gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[0].introdiag);
-
-			}
-			else if (ent->client->pers.questlog[Interact.ent->questNum].questcompleted == false) {
-				// CHECK IF QUEST COMPLETE: 
-				if (ent->client->pers.questlog[Interact.ent->questNum].kills >= ent->client->pers.questlog[Interact.ent->questNum].killsneeded) // ADD OR FOR AN OBJECTIVE BEING COMPLETE
-				{
-
-				} 
-				else {
-					gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].inprogressdiag);
-				}
-			}
-			else if (ent->client->pers.questlog[Interact.ent->questNum].questcompleted == true) {
-				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].postdiag);
-			}
-			else {
-				gi.bprintf(PRINT_CHAT, "Something went wrong with the quest interaction...\n");
-			}
-			
-			/* else if (Interact.ent->questNum == 1) {
-				gi.centerprintf(ent, "Quest: Kill 5 Enemies");
-			}
-			else {
-				gi.centerprintf(ent, "Unknown quest num");
-			}
-			*/
-		}
+		Interact(ent, start);
 	}
 }
 
@@ -921,64 +916,78 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 
 	ent->client->weapon_sound = gi.soundindex("weapons/hyprbl1a.wav");
 
-	if (!(ent->client->buttons & BUTTON_ATTACK))
-	{
-		ent->client->ps.gunframe++;
-	}
-	else
-	{
-		if (! ent->client->pers.inventory[ent->client->ammo_index] )
+		if (!(ent->client->buttons & BUTTON_ATTACK))
 		{
-			if (level.time >= ent->pain_debounce_time)
-			{
-				gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
-				ent->pain_debounce_time = level.time + 1;
-			}
-			NoAmmoWeaponChange (ent);
+			ent->client->ps.gunframe++;
 		}
 		else
 		{
-			rotation = (ent->client->ps.gunframe - 5) * 2*M_PI/6;
-			offset[0] = -4 * sin(rotation);
-			offset[1] = 0;
-			offset[2] = 4 * cos(rotation);
+			if (ent->client->pers.hand != 2) {
+				if (!ent->client->pers.inventory[ent->client->ammo_index])
+				{
+					if (level.time >= ent->pain_debounce_time)
+					{
+						gi.sound(ent, CHAN_VOICE, gi.soundindex("weapons/noammo.wav"), 1, ATTN_NORM, 0);
+						ent->pain_debounce_time = level.time + 1;
+					}
+					NoAmmoWeaponChange(ent);
+				}
+				else
+				{
+					rotation = (ent->client->ps.gunframe - 5) * 2 * M_PI / 6;
+					offset[0] = -4 * sin(rotation);
+					offset[1] = 0;
+					offset[2] = 4 * cos(rotation);
 
-			if ((ent->client->ps.gunframe == 6) || (ent->client->ps.gunframe == 9))
-				effect = EF_HYPERBLASTER;
-			else
-				effect = 0;
-			if (deathmatch->value)
-				damage = 15;
-			else
-				damage = 20;
-			Blaster_Fire (ent, offset, damage, true, effect);
-			if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-				ent->client->pers.inventory[ent->client->ammo_index]--;
+					if ((ent->client->ps.gunframe == 6) || (ent->client->ps.gunframe == 9))
+						effect = EF_HYPERBLASTER;
+					else
+						effect = 0;
+					if (deathmatch->value)
+						damage = 15;
+					else
+						damage = 20;
+					Blaster_Fire(ent, offset, damage, true, effect);
+					if (!((int)dmflags->value & DF_INFINITE_AMMO))
+						ent->client->pers.inventory[ent->client->ammo_index]--;
 
-			ent->client->anim_priority = ANIM_ATTACK;
-			if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
-			{
-				ent->s.frame = FRAME_crattak1 - 1;
-				ent->client->anim_end = FRAME_crattak9;
+					ent->client->anim_priority = ANIM_ATTACK;
+					if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
+					{
+						ent->s.frame = FRAME_crattak1 - 1;
+						ent->client->anim_end = FRAME_crattak9;
+					}
+					else
+					{
+						ent->s.frame = FRAME_attack1 - 1;
+						ent->client->anim_end = FRAME_attack8;
+					}
+				}
 			}
-			else
-			{
-				ent->s.frame = FRAME_attack1 - 1;
-				ent->client->anim_end = FRAME_attack8;
+			else {
+				vec3_t	forward, right;
+				vec3_t	start;
+				vec3_t	offset;
+
+				AngleVectors(ent->client->v_angle, forward, right, NULL);
+				VectorSet(offset, 24, 8, ent->viewheight - 8);
+				VectorAdd(offset, vec3_origin, offset);
+				P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+				Interact(ent, start);
 			}
+
+			ent->client->ps.gunframe++;
+			if (ent->client->ps.gunframe == 12 && ent->client->pers.inventory[ent->client->ammo_index])
+				ent->client->ps.gunframe = 6;
 		}
 
-		ent->client->ps.gunframe++;
-		if (ent->client->ps.gunframe == 12 && ent->client->pers.inventory[ent->client->ammo_index])
-			ent->client->ps.gunframe = 6;
-	}
-
-	if (ent->client->ps.gunframe == 12)
-	{
-		gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM, 0);
-		ent->client->weapon_sound = 0;
-	}
-
+		if (ent->client->ps.gunframe == 12)
+		{
+			gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/hyprbd1a.wav"), 1, ATTN_NORM, 0);
+			ent->client->weapon_sound = 0;
+		}
+	
+	
 }
 
 void Weapon_HyperBlaster (edict_t *ent)

@@ -385,7 +385,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 
 	if (!targ->takedamage)
 		return;
-
+	
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
@@ -486,6 +486,10 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 // do the damage
 	if (take)
 	{
+		// Matthew LiDonni
+		int healthBefore = targ->health;
+		// End
+
 		if ((targ->svflags & SVF_MONSTER) || (client))
 			SpawnDamage (TE_BLOOD, point, normal, take);
 		else
@@ -494,11 +498,19 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 
 		targ->health = targ->health - take;
 			
+
 		if (targ->health <= 0)
 		{
 			if ((targ->svflags & SVF_MONSTER) || (client))
 				targ->flags |= FL_NO_KNOCKBACK;
 			Killed (targ, inflictor, attacker, take, point);
+			
+			// Game crashes if trying to check NPC for a questlog
+			if (healthBefore > 0 && strcmp(attacker->classname, "player") == 0) {
+				if (strcmp(attacker->client->pers.questlog[0].killclassname, targ->classname) == 0) {
+					attacker->client->pers.questlog[0].kills++;
+				}
+			}
 			return;
 		}
 	}

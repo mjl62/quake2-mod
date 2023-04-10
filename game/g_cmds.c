@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "g_local.h"
 #include "m_player.h"
-
+#include "m_questgiver.h"
 
 char *ClientTeam (edict_t *ent)
 {
@@ -909,9 +909,19 @@ void Cmd_ToggleHolster_f(edict_t* ent) {
 		gi.AddCommandString("hand 2");
 		//ent->client->pers.hand = 2;
 	}
-	
-	
 }
+
+void Cmd_GetQuestLog_f(edict_t* ent) {
+	for (int i = 0; i < 5; i++) {
+		if (ent->client->pers.questlog[i].queststarted && !ent->client->pers.questlog[i].questcompleted) {
+			gi.bprintf(PRINT_HIGH, ent->client->pers.questlog[i].questname);
+			gi.bprintf(PRINT_HIGH, ": ");
+			gi.bprintf(PRINT_HIGH, ent->client->pers.questlog[i].questdesc);
+			gi.bprintf(PRINT_HIGH, "\n");
+		}
+	}
+}
+
 
 
 /*
@@ -1001,8 +1011,21 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f(ent);
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+	// Custom Commands Matthew LiDonni
 	else if (Q_stricmp(cmd, "holster") == 0)
 		Cmd_ToggleHolster_f(ent);
+	else if (Q_stricmp(cmd, "questgiver") == 0) {
+		vec3_t o = { 153, -140, 46 };
+		vec3_t a = { 0, 178, 0 };
+		SP_QuestGiver(ent, o, a, 0);
+		vec3_t o2 = { 153, -200, 46 };
+		vec3_t a2 = { 0, 178, 0 };
+		SP_QuestGiver(ent, o2, a2, 1);
+	}
+	else if (Q_stricmp(cmd, "journal") == 0) {
+		Cmd_GetQuestLog_f(ent);
+	}
+	// End Custom Commands
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

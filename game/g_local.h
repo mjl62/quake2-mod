@@ -825,6 +825,25 @@ void GetChaseTarget(edict_t *ent);
 #define	ANIM_DEATH		5
 #define	ANIM_REVERSE	6
 
+// Matthew LiDonni
+// Quests
+typedef struct {
+	int			questNum;
+	qboolean	queststarted;
+	qboolean	questcompleted;
+	char		questname[32];
+	char		questdesc[64];
+	char		introdiag[128];
+	char		inprogressdiag[128];
+	char		completediag[128];
+	char		postdiag[128];
+
+	char		killclassname[16];
+	int			kills;
+	int			killsneeded;
+	int			rewardXP;
+	// reward item;
+} quest;
 
 // client data that stays across multiple level loads
 typedef struct
@@ -863,6 +882,7 @@ typedef struct
 
 	qboolean	spectator;			// client is a spectator
 
+	quest		questlog[5];
 
 } client_persistant_t;
 
@@ -1111,5 +1131,8 @@ struct edict_s
 	// common data blocks
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
+
+	// Questgiver data (Matthew LiDonni)
+	int			questNum;
 };
 

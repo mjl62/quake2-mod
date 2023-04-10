@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "g_local.h"
 #include "m_player.h"
+#include "m_questgiver.h"
 
 
 static qboolean	is_quad;
@@ -852,8 +853,39 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		end[2] = 1;
 		
 		Interact = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
-		if (Interact.fraction != 1.0) {
-			gi.centerprintf(ent, Interact.ent->classname);
+		if (Interact.fraction != 1.0 && Interact.ent->classname == "questgiver") {
+			if (ent->client->pers.questlog[Interact.ent->questNum].queststarted != true) {
+				ent->client->pers.questlog[Interact.ent->questNum] = getQuest(Interact.ent->questNum);
+				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].introdiag);
+			//if (Interact.ent->questNum == 0 && ent->client->pers.questlog[0].queststarted != true) {
+				//ent->client->pers.questlog[0] = getQuest(0);
+				//gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[0].introdiag);
+
+			}
+			else if (ent->client->pers.questlog[Interact.ent->questNum].questcompleted == false) {
+				// CHECK IF QUEST COMPLETE: 
+				if (ent->client->pers.questlog[Interact.ent->questNum].kills >= ent->client->pers.questlog[Interact.ent->questNum].killsneeded) // ADD OR FOR AN OBJECTIVE BEING COMPLETE
+				{
+
+				} 
+				else {
+					gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].inprogressdiag);
+				}
+			}
+			else if (ent->client->pers.questlog[Interact.ent->questNum].questcompleted == true) {
+				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].postdiag);
+			}
+			else {
+				gi.bprintf(PRINT_CHAT, "Something went wrong with the quest interaction...\n");
+			}
+			
+			/* else if (Interact.ent->questNum == 1) {
+				gi.centerprintf(ent, "Quest: Kill 5 Enemies");
+			}
+			else {
+				gi.centerprintf(ent, "Unknown quest num");
+			}
+			*/
 		}
 	}
 }

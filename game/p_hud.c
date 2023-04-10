@@ -301,7 +301,7 @@ Draw help computer.
 */
 void HelpComputer (edict_t *ent)
 {
-	char	string[1024];
+	char	string[2048]; // was 1024
 	char	*sk;
 
 	if (skill->value == 0)
@@ -313,22 +313,101 @@ void HelpComputer (edict_t *ent)
 	else
 		sk = "hard+";
 
+	// Matthew LiDonni
+	
+	char quest0[128] = "";
+	char quest1[128] = "";
+	char quest2[128] = "";
+	char quest3[128] = "";
+	char quest4[128] = "";
+	
+	char objcurrent[2];
+	char objtotal[2];
+	if (ent->client->pers.questlog[0].queststarted == true) {
+		strcpy(quest0, ent->client->pers.questlog[0].questname);
+		strcat(quest0, ": ");
+		strcat(quest0, ent->client->pers.questlog[0].questdesc);
+		strcat(quest0, "   ");
+		itoa(ent->client->pers.questlog[0].kills, objcurrent, 10);
+		strcat(quest0, objcurrent);
+		strcat(quest0, "/");
+		itoa(ent->client->pers.questlog[0].killsneeded, objtotal, 10);
+		strcat(quest0, objtotal);
+	}
+	if (ent->client->pers.questlog[1].queststarted == true) {
+		strcpy(quest1, ent->client->pers.questlog[1].questname);
+		strcat(quest1, ": ");
+		strcat(quest1, ent->client->pers.questlog[1].questdesc);
+		strcat(quest1, "   ");
+		itoa(ent->client->pers.questlog[1].kills, objcurrent, 10);
+		strcat(quest1, objcurrent);
+		strcat(quest1, "/");
+		itoa(ent->client->pers.questlog[1].killsneeded, objtotal, 10);
+		strcat(quest1, objtotal);
+	}
+	if (ent->client->pers.questlog[2].queststarted == true) {
+		strcpy(quest2, ent->client->pers.questlog[2].questname);
+		strcat(quest2, ": ");
+		strcat(quest2, ent->client->pers.questlog[2].questdesc);
+		strcat(quest2, "   ");
+		itoa(ent->client->pers.questlog[2].kills, objcurrent, 10);
+		strcat(quest2, objcurrent);
+		strcat(quest2, "/");
+		itoa(ent->client->pers.questlog[2].killsneeded, objtotal, 10);
+		strcat(quest2, objtotal);
+	}
+	if (ent->client->pers.questlog[3].queststarted == true) {
+		strcpy(quest3, ent->client->pers.questlog[3].questname);
+		strcat(quest3, ": ");
+		strcat(quest3, ent->client->pers.questlog[3].questdesc);
+		strcat(quest3, "   ");
+		itoa(ent->client->pers.questlog[3].kills, objcurrent, 10);
+		strcat(quest3, objcurrent);
+		strcat(quest3, "/");
+		itoa(ent->client->pers.questlog[3].killsneeded, objtotal, 10);
+		strcat(quest3, objtotal);
+	}
+	if (ent->client->pers.questlog[4].queststarted == true) {
+		strcpy(quest4, ent->client->pers.questlog[4].questname);
+		strcat(quest4, ": ");
+		strcat(quest4, ent->client->pers.questlog[4].questdesc);
+		strcat(quest4, "   ");
+		itoa(ent->client->pers.questlog[4].kills, objcurrent, 10);
+		strcat(quest4, objcurrent);
+		strcat(quest4, "/");
+		itoa(ent->client->pers.questlog[4].killsneeded, objtotal, 10);
+		strcat(quest4, objtotal);
+	}
+
 	// send the layout
 	Com_sprintf (string, sizeof(string),
-		"xv 32 yv 8 picn help "			// background
-		"xv 202 yv 12 string2 \"%s\" "		// skill
-		"xv 0 yv 24 cstring2 \"%s\" "		// level name
-		"xv 0 yv 54 cstring2 \"%s\" "		// help 1
-		"xv 0 yv 110 cstring2 \"%s\" "		// help 2
-		"xv 50 yv 164 string2 \" kills     goals    secrets\" "
-		"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" ", 
-		sk,
-		level.level_name,
-		game.helpmessage1,
-		game.helpmessage2,
-		level.killed_monsters, level.total_monsters, 
-		level.found_goals, level.total_goals,
-		level.found_secrets, level.total_secrets);
+		"" // "was xv 32 yv 8 picn help " 															// background
+		//"xv 202 yv 12 string2 \"%s\" "															// skill
+		"xv 0 yv 24 cstring2 \"%s\" "																// level name
+		"xv 0 yv 48 cstring2 \"%s\" "	// quest 0		//was "xv 0 yv 54 cstring2 \"%s\" "			// help 1
+		"xv 0 yv 64 cstring2 \"%s\" "  // quest 1		//was "xv 0 yv 110 cstring2 \"%s\" "		// help 2
+		"xv 0 yv 80 cstring2 \"%s\" "  // quest 2		//was "xv 0 yv 110 cstring2 \"%s\" "		// help 2
+		"xv 0 yv 96 cstring2 \"%s\" "  // quest 3		//was "xv 0 yv 110 cstring2 \"%s\" "		// help 2
+		"xv 0 yv 112 cstring2 \"%s\" "  // quest 4		//was "xv 0 yv 110 cstring2 \"%s\" "		// help 2
+		//"xv 50 yv 164 string2 \" kills     goals    secrets\" "			
+		//"xv 50 yv 172 string2 \"%3i/%3i     %i/%i       %i/%i\" "
+		, 
+		//sk,											//was sk
+		"Journal:",										//was level.level_name
+		quest0,											// was game.helpmessage1					// help 1
+		
+		quest1,											// was game.helpmessage2					// help 2
+
+		quest2,
+
+		quest3,
+
+		quest4
+
+		//,
+		//level.killed_monsters, level.total_monsters,                                                
+		//level.found_secrets, level.total_secrets
+		);
 
 	gi.WriteByte (svc_layout);
 	gi.WriteString (string);

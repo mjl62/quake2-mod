@@ -627,6 +627,15 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.max_slugs		= 50;
 
 	client->pers.connected = true;
+
+	quest q;
+	q.queststarted = false;
+	// Matthew LiDonni
+	client->pers.questlog[0] = q;
+	client->pers.questlog[1] = q;
+	client->pers.questlog[2] = q;
+	client->pers.questlog[3] = q;
+	client->pers.questlog[4] = q;
 }
 
 

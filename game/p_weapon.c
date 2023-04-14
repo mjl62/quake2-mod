@@ -401,6 +401,21 @@ void Interact(edict_t* ent, vec3_t start) {
 	}
 }
 
+void Melee(edict_t* ent, vec3_t start) {
+
+	trace_t Interact;
+	vec3_t end;
+	end[0] = 0;
+	end[1] = 0;
+	end[2] = 1;
+
+	// Testing
+	Interact = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
+	if (Interact.fraction != 1.0) {
+		gi.centerprintf(ent, Interact.ent->classname);
+	}
+}
+
 /*
 ================
 Weapon_Generic
@@ -816,7 +831,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 	VectorSet(offset, 8, 8, ent->viewheight-8);
 	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_rocket (ent, start, forward, damage, 400, damage_radius, radius_damage); // speed was 650
+	fire_rocket (ent, start, forward, damage, 325, damage_radius, radius_damage); // speed was 650
 
 	// send muzzle flash
 	gi.WriteByte (svc_muzzleflash);
@@ -1244,48 +1259,60 @@ void weapon_shotgun_fire (edict_t *ent)
 	vec3_t		offset;
 	int			damage = 4; // was 4
 	int			kick = 8; // was 8
-
+	
 	if (ent->client->ps.gunframe == 9)
 	{
 		ent->client->ps.gunframe++;
 		return;
 	}
 
-	// HERE FOR LOOK DIR MATTHEW LIDONNI
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -2;
+	// If weapon not holstered
+	if (ent->client->pers.hand != 2) {	
 
-	VectorSet(offset, 0, 8,  ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+		AngleVectors (ent->client->v_angle, forward, right, NULL);
+		VectorScale (forward, -2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -2;
 
-	if (is_quad)
-	{
-		damage *= 4;
-		kick *= 4;
+		VectorSet(offset, 0, 8, ent->viewheight - 8);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+	
+		if (is_quad)
+		{
+			damage *= 4;
+			kick *= 4;
+		}
+		// Custom code Matthew LiDonni
+		int hspread = 500; // was 500
+		int vspread = 500; // was 500
+
+		// End custom code
+
+		if (deathmatch->value)
+			fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
+		else
+			fire_shotgun(ent, start, forward, damage, kick, hspread, vspread, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+
+		// send muzzle flash
+		gi.WriteByte(svc_muzzleflash);
+		gi.WriteShort(ent - g_edicts);
+		gi.WriteByte(MZ_SHOTGUN | is_silenced);
+		gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+		ent->client->ps.gunframe++;
+		PlayerNoise(ent, start, PNOISE_WEAPON);
+
+		if (!((int)dmflags->value & DF_INFINITE_AMMO))
+			ent->client->pers.inventory[ent->client->ammo_index]--;
 	}
-	// Custom code Matthew LiDonni
-	int hspread = 500; // was 500
-	int vspread = 500; // was 500
-
-	// End custom code
-
-	if (deathmatch->value)
-		fire_shotgun (ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
-	else
-		fire_shotgun (ent, start, forward, damage, kick, hspread, vspread, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
-
-	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_SHOTGUN | is_silenced);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	ent->client->ps.gunframe++;
-	PlayerNoise(ent, start, PNOISE_WEAPON);
-
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+	else {
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
+		VectorSet(offset, 24, 8, ent->viewheight - 8);
+		VectorAdd(offset, vec3_origin, offset);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+		fire_shotgun(ent, start, forward, damage, kick, 0, 0, 0, MOD_SHOTGUN);
+		ent->client->ps.gunframe++;
+		Interact(ent, start);
+	}
 }
 
 void Weapon_Shotgun (edict_t *ent)
@@ -1306,40 +1333,53 @@ void weapon_supershotgun_fire (edict_t *ent)
 	int			damage = 6;
 	int			kick = 12;
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
+	// If weapon not holstered
+	if (ent->client->pers.hand != 2) {
 
-	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -2;
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
 
-	VectorSet(offset, 0, 8,  ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+		VectorScale(forward, -2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -2;
 
-	if (is_quad)
-	{
-		damage *= 4;
-		kick *= 4;
+		VectorSet(offset, 0, 8, ent->viewheight - 8);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+		if (is_quad)
+		{
+			damage *= 4;
+			kick *= 4;
+		}
+
+		v[PITCH] = ent->client->v_angle[PITCH];
+		v[YAW] = ent->client->v_angle[YAW] - 5;
+		v[ROLL] = ent->client->v_angle[ROLL];
+		AngleVectors(v, forward, NULL, NULL);
+		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
+		v[YAW] = ent->client->v_angle[YAW] + 5;
+		AngleVectors(v, forward, NULL, NULL);
+		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
+
+		// send muzzle flash
+		gi.WriteByte(svc_muzzleflash);
+		gi.WriteShort(ent - g_edicts);
+		gi.WriteByte(MZ_SSHOTGUN | is_silenced);
+		gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+		ent->client->ps.gunframe++;
+		PlayerNoise(ent, start, PNOISE_WEAPON);
+
+		if (!((int)dmflags->value & DF_INFINITE_AMMO))
+			ent->client->pers.inventory[ent->client->ammo_index] -= 2;
 	}
-
-	v[PITCH] = ent->client->v_angle[PITCH];
-	v[YAW]   = ent->client->v_angle[YAW] - 5;
-	v[ROLL]  = ent->client->v_angle[ROLL];
-	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
-	v[YAW]   = ent->client->v_angle[YAW] + 5;
-	AngleVectors (v, forward, NULL, NULL);
-	fire_shotgun (ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT/2, MOD_SSHOTGUN);
-
-	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_SSHOTGUN | is_silenced);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	ent->client->ps.gunframe++;
-	PlayerNoise(ent, start, PNOISE_WEAPON);
-
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index] -= 2;
+	else {
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
+		VectorSet(offset, 24, 8, ent->viewheight - 8);
+		VectorAdd(offset, vec3_origin, offset);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+		fire_shotgun(ent, start, forward, damage, kick, 0, 0, 0, MOD_SHOTGUN);
+		ent->client->ps.gunframe++;
+		Interact(ent, start);
+	}
 }
 
 void Weapon_SuperShotgun (edict_t *ent)

@@ -299,6 +299,8 @@ HelpComputer
 Draw help computer.
 ==================
 */
+
+// Is now questlog
 void HelpComputer (edict_t *ent)
 {
 	char	string[2048]; // was 1024
@@ -443,6 +445,141 @@ void Cmd_Help_f (edict_t *ent)
 	ent->client->showhelp = true;
 	ent->client->pers.helpchanged = 0;
 	HelpComputer (ent);
+}
+
+// Matthew LiDonni
+// A helpmenu to show RPG stats
+void ShowRPGStats(edict_t* ent)
+{
+	char	string[2048]; // was 1024
+	char* sk;
+
+	if (skill->value == 0)
+		sk = "easy";
+	else if (skill->value == 1)
+		sk = "medium";
+	else if (skill->value == 2)
+		sk = "hard";
+	else
+		sk = "hard+";
+
+	// Matthew LiDonni
+
+	char row1[64] = "";
+	char row2[64] = "";
+	char row3[64] = "";
+	char row4[64] = "";
+	char row5[64] = "";
+	char row6[64] = "";
+
+	char skillLevel[2];
+	// Row 1
+	strcpy(row1, "Strength: ");
+	itoa(ent->client->pers.stat_strength, skillLevel, 10);
+	strcat(row1, skillLevel);
+	strcat(row1, "    ");
+	strcpy(skillLevel, "");
+	strcat(row1, "Intelligence: ");
+	itoa(ent->client->pers.stat_intelligence, skillLevel, 10);
+	strcat(row1, skillLevel);
+	
+	// Row 2
+	strcpy(row2, "Willpower: ");
+	itoa(ent->client->pers.stat_willpower, skillLevel, 10);
+	strcat(row2, skillLevel);
+	strcat(row2, "    ");
+	strcpy(skillLevel, "");
+	strcat(row2, "Agility: ");
+	itoa(ent->client->pers.stat_agility, skillLevel, 10);
+	strcat(row2, skillLevel);
+
+	// Row 3
+	strcpy(row3, "Endurance: ");
+	itoa(ent->client->pers.stat_endurance, skillLevel, 10);
+	strcat(row3, skillLevel);
+	strcat(row3, "    ");
+	strcpy(skillLevel, "");
+
+	// Row 4
+	strcpy(row4, "Blades: ");
+	itoa(ent->client->pers.skill_blades, skillLevel, 10);
+	strcat(row4, skillLevel);
+	strcat(row4, "    ");
+	strcpy(skillLevel, "");
+	strcat(row4, "Two-Hand: ");
+	itoa(ent->client->pers.skill_twohand, skillLevel, 10);
+	strcat(row4, skillLevel);
+
+	// Row 5
+	strcpy(row5, "Bow: ");
+	itoa(ent->client->pers.skill_bow, skillLevel, 10);
+	strcat(row5, skillLevel);
+	strcat(row5, "    ");
+	strcpy(skillLevel, "");
+	strcat(row5, "Destruction: ");
+	itoa(ent->client->pers.skill_destruction, skillLevel, 10);
+	strcat(row5, skillLevel);
+
+	// Row 6
+	strcpy(row6, "Restoration: ");
+	itoa(ent->client->pers.skill_restoration, skillLevel, 10);
+	strcat(row6, skillLevel);
+	strcat(row6, "    ");
+	strcpy(skillLevel, "");
+	strcat(row6, "Alteration: ");
+	itoa(ent->client->pers.skill_alteration, skillLevel, 10);
+	strcat(row6, skillLevel);
+	
+
+	// send the layout
+	Com_sprintf(string, sizeof(string),
+		""	
+		"xv 0 yv 24 cstring2 \"%s\" "	// Title 1
+		"xv 0 yv 48 cstring2 \"%s\" "	// row 1
+		"xv 0 yv 64 cstring2 \"%s\" "  // row 2
+		"xv 0 yv 80 cstring2 \"%s\" "  // row 3
+		"xv 0 yv 112 cstring2 \"%s\" "  // Title 2
+		"xv 0 yv 144 cstring2 \"%s\" "  // row 4
+		"xv 0 yv 160 cstring2 \"%s\" "  // row 5
+		"xv 0 yv 176 cstring2 \"%s\" "  // row 6
+		,
+		"Main Attributes:",
+		row1,
+		row2,
+		row3,
+		"Skills:",
+		row4,
+		row5,
+		row6
+		);
+
+	gi.WriteByte(svc_layout);
+	gi.WriteString(string);
+	gi.unicast(ent, true);
+}
+
+void Cmd_ShowRPGStat_f(edict_t* ent)
+{
+	// this is for backwards compatability
+	if (deathmatch->value)
+	{
+		Cmd_Score_f(ent);
+		return;
+	}
+
+	ent->client->showinventory = false;
+	ent->client->showscores = false;
+
+	// TODO set up my own show command like this
+	if (ent->client->showhelp && (ent->client->pers.game_helpchanged == game.helpchanged))
+	{
+		ent->client->showhelp = false;
+		return;
+	}
+
+	ent->client->showhelp = true;
+	ent->client->pers.helpchanged = 0;
+	ShowRPGStats(ent);
 }
 
 

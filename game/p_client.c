@@ -636,6 +636,20 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.questlog[2] = q;
 	client->pers.questlog[3] = q;
 	client->pers.questlog[4] = q;
+
+	// Stats will default to level 1
+	client->pers.stat_strength = 1.0;
+	client->pers.stat_intelligence = 1.0;
+	client->pers.stat_agility = 1.0;
+	client->pers.stat_endurance = 1.0;
+	client->pers.stat_willpower = 1.0;
+
+	client->pers.skill_blades = 5;
+	client->pers.skill_twohand = 5;
+	client->pers.skill_bow = 5;
+	client->pers.skill_destruction = 5;
+	client->pers.skill_restoration = 5;
+	client->pers.skill_alteration = 5;
 }
 
 
@@ -683,6 +697,29 @@ void FetchClientEntData (edict_t *ent)
 		ent->client->resp.score = ent->client->pers.score;
 }
 
+
+// Matthew LiDonni
+// Returns as an int, removing the decimal
+int GetLevelOf(edict_t* ent, int skill) {
+	if (skill == SKILL_STRENGTH) {
+		return ent->client->pers.stat_strength;
+	}
+	else if (skill == SKILL_INTELLIGENCE) {
+		return ent->client->pers.stat_intelligence;
+	}
+	else if (skill == SKILL_WILLPOWER) {
+		return ent->client->pers.stat_willpower;
+	}
+	else if (skill == SKILL_AGILITY) {
+		return ent->client->pers.stat_agility;
+	}
+	else if (skill == SKILL_ENDURANCE) {
+		return ent->client->pers.stat_endurance;
+	}
+	else {
+		return 0;
+	}
+}
 
 
 /*

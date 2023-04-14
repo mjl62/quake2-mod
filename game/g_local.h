@@ -601,6 +601,7 @@ extern	gitem_t	itemlist[];
 //
 void Cmd_Help_f (edict_t *ent);
 void Cmd_Score_f (edict_t *ent);
+void Cmd_ShowRPGStat_f(edict_t* ent);
 
 //
 // g_items.c
@@ -882,7 +883,28 @@ typedef struct
 
 	qboolean	spectator;			// client is a spectator
 
+	// Matthew LiDonni
 	quest		questlog[5];
+	
+	// Stamina and Mana
+	int			fatigue;
+	int			max_fatigue;
+	int			magicka;
+	int			max_magicka;
+	
+	// Stats (Floats, will drop the decimal off in "GetLevelOf" method, so each level will be for every 1)
+	float		stat_strength; // Increase weapon damage and max fatigue
+	float		stat_intelligence; // Increase magic damage and maximum magicka
+	float		stat_willpower; // Increases magic hit-rate and max fatigue
+	float		stat_agility; // Increases weapon hit-rate and max fatigue
+	float		stat_endurance; // Increase max health
+
+	float		skill_blades; // Sword and Dagger
+	float		skill_twohand; // Axe and GreatHammer
+	float		skill_bow; // bow
+	float		skill_destruction; // Fireball and Dire Viper
+	float		skill_restoration; // Healing Word and Fortify
+	float		skill_alteration; // Open Lock
 
 } client_persistant_t;
 

@@ -1025,6 +1025,9 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp(cmd, "journal") == 0) {
 		Cmd_GetQuestLog_f(ent);
 	}
+	else if (Q_stricmp(cmd, "rpgstats") == 0) {
+		Cmd_ShowRPGStat_f(ent);
+	}
 	// End Custom Commands
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);

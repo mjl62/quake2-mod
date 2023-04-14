@@ -1011,6 +1011,13 @@ typedef enum
 
 #define	MAX_STATS				32
 
+// Stats for RPG mod (Matthew LiDonni)
+#define SKILL_STRENGTH			0
+#define SKILL_INTELLIGENCE		1
+#define SKILL_WILLPOWER			2
+#define SKILL_AGILITY			3
+#define SKILL_ENDURANCE			4
+// End Stats
 
 // dmflags->value flags
 #define	DF_NO_HEALTH		0x00000001	// 1

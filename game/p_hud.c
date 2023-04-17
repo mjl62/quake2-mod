@@ -325,7 +325,7 @@ void HelpComputer (edict_t *ent)
 	
 	char objcurrent[2];
 	char objtotal[2];
-	if (ent->client->pers.questlog[0].queststarted == true) {
+	if (ent->client->pers.questlog[0].queststarted == true && ent->client->pers.questlog[0].questcompleted != true) {
 		strcpy(quest0, ent->client->pers.questlog[0].questname);
 		strcat(quest0, ": ");
 		strcat(quest0, ent->client->pers.questlog[0].questdesc);
@@ -336,7 +336,7 @@ void HelpComputer (edict_t *ent)
 		itoa(ent->client->pers.questlog[0].killsneeded, objtotal, 10);
 		strcat(quest0, objtotal);
 	}
-	if (ent->client->pers.questlog[1].queststarted == true) {
+	if (ent->client->pers.questlog[1].queststarted == true && ent->client->pers.questlog[1].questcompleted != true) {
 		strcpy(quest1, ent->client->pers.questlog[1].questname);
 		strcat(quest1, ": ");
 		strcat(quest1, ent->client->pers.questlog[1].questdesc);
@@ -347,7 +347,7 @@ void HelpComputer (edict_t *ent)
 		itoa(ent->client->pers.questlog[1].killsneeded, objtotal, 10);
 		strcat(quest1, objtotal);
 	}
-	if (ent->client->pers.questlog[2].queststarted == true) {
+	if (ent->client->pers.questlog[2].queststarted == true && ent->client->pers.questlog[2].questcompleted != true) {
 		strcpy(quest2, ent->client->pers.questlog[2].questname);
 		strcat(quest2, ": ");
 		strcat(quest2, ent->client->pers.questlog[2].questdesc);
@@ -358,7 +358,7 @@ void HelpComputer (edict_t *ent)
 		itoa(ent->client->pers.questlog[2].killsneeded, objtotal, 10);
 		strcat(quest2, objtotal);
 	}
-	if (ent->client->pers.questlog[3].queststarted == true) {
+	if (ent->client->pers.questlog[3].queststarted == true && ent->client->pers.questlog[3].questcompleted != true) {
 		strcpy(quest3, ent->client->pers.questlog[3].questname);
 		strcat(quest3, ": ");
 		strcat(quest3, ent->client->pers.questlog[3].questdesc);
@@ -369,7 +369,7 @@ void HelpComputer (edict_t *ent)
 		itoa(ent->client->pers.questlog[3].killsneeded, objtotal, 10);
 		strcat(quest3, objtotal);
 	}
-	if (ent->client->pers.questlog[4].queststarted == true) {
+	if (ent->client->pers.questlog[4].queststarted == true && ent->client->pers.questlog[4].questcompleted != true) {
 		strcpy(quest4, ent->client->pers.questlog[4].questname);
 		strcat(quest4, ": ");
 		strcat(quest4, ent->client->pers.questlog[4].questdesc);
@@ -471,6 +471,7 @@ void ShowRPGStats(edict_t* ent)
 	char row4[64] = "";
 	char row5[64] = "";
 	char row6[64] = "";
+	char row7[64] = "";
 
 	char skillLevel[2];
 	// Row 1
@@ -529,7 +530,28 @@ void ShowRPGStats(edict_t* ent)
 	strcat(row6, "Alteration: ");
 	itoa(ent->client->pers.skill_alteration, skillLevel, 10);
 	strcat(row6, skillLevel);
-	
+
+	// Row 7
+	strcpy(row7, "Health: ");
+	itoa(ent->health, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "/");
+	itoa(ent->max_health, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "    ");
+	strcat(row7, "Fatigue: ");
+	itoa(ent->client->pers.fatigue, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "/");
+	itoa(ent->client->pers.max_fatigue, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "    ");
+	strcat(row7, "Magicka: ");
+	itoa(ent->client->pers.magicka, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "/");
+	itoa(ent->client->pers.max_magicka, skillLevel, 10);
+	strcat(row7, skillLevel);
 
 	// send the layout
 	Com_sprintf(string, sizeof(string),
@@ -542,6 +564,7 @@ void ShowRPGStats(edict_t* ent)
 		"xv 0 yv 144 cstring2 \"%s\" "  // row 4
 		"xv 0 yv 160 cstring2 \"%s\" "  // row 5
 		"xv 0 yv 176 cstring2 \"%s\" "  // row 6
+		"xv 0 yv 196 cstring2 \"%s\" " // row 7
 		,
 		"Main Attributes:",
 		row1,
@@ -550,7 +573,8 @@ void ShowRPGStats(edict_t* ent)
 		"Skills:",
 		row4,
 		row5,
-		row6
+		row6,
+		row7
 		);
 
 	gi.WriteByte(svc_layout);

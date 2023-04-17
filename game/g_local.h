@@ -755,6 +755,7 @@ void InitClientPersistant (gclient_t *client);
 void InitClientResp (gclient_t *client);
 void InitBodyQue (void);
 void ClientBeginServerFrame (edict_t *ent);
+qboolean canCastSpell(edict_t* ent, int magickacost);
 
 //
 // g_player.c

@@ -921,6 +921,11 @@ void Cmd_GetQuestLog_f(edict_t* ent) {
 		}
 	}
 }
+void Cmd_HealRPG_f(edict_t* ent) {
+	ent->health = ent->max_health;
+	ent->client->pers.magicka = ent->client->pers.max_magicka;
+	ent->client->pers.fatigue = ent->client->pers.max_fatigue;
+}
 
 
 
@@ -1027,6 +1032,9 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp(cmd, "rpgstats") == 0) {
 		Cmd_ShowRPGStat_f(ent);
+	}
+	else if (Q_stricmp(cmd, "rpgheal") == 0) {
+		Cmd_HealRPG_f(ent);
 	}
 	// End Custom Commands
 	else	// anything that doesn't match a command will be a chat

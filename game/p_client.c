@@ -637,6 +637,11 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.questlog[3] = q;
 	client->pers.questlog[4] = q;
 
+	client->pers.magicka = 100;
+	client->pers.max_magicka = 100;
+	client->pers.fatigue = 100;
+	client->pers.max_fatigue = 100;
+
 	// Stats will default to level 1
 	client->pers.stat_strength = 1.0;
 	client->pers.stat_intelligence = 1.0;
@@ -1848,4 +1853,16 @@ void ClientBeginServerFrame (edict_t *ent)
 			PlayerTrail_Add (ent->s.old_origin);
 
 	client->latched_buttons = 0;
+}
+
+// Returns boolean and if true, charges mana cost
+qboolean canCastSpell(edict_t* ent, int magickacost) {
+	if (ent->client->pers.magicka >= magickacost) {
+		ent->client->pers.magicka -= magickacost;
+		return true;
+	}
+	gi.centerprintf(ent, "Not enough magicka.");
+	return false;
+	
+
 }

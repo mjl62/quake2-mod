@@ -403,16 +403,16 @@ void Interact(edict_t* ent, vec3_t start) {
 
 void Melee(edict_t* ent, vec3_t start) {
 
-	trace_t Interact;
+	trace_t Swing;
 	vec3_t end;
 	end[0] = 0;
 	end[1] = 0;
 	end[2] = 1;
 
 	// Testing
-	Interact = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
-	if (Interact.fraction != 1.0) {
-		gi.centerprintf(ent, Interact.ent->classname);
+	Swing = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
+	if (Swing.fraction != 1.0) {
+		gi.centerprintf(ent, Swing.ent->classname);
 	}
 }
 
@@ -814,37 +814,59 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 	float	damage_radius;
 	int		radius_damage;
 
-	damage = 100 + (int)(random() * 20.0); // was 100
-	radius_damage = 120; // was 120
-	damage_radius = 120; // was 120
-	if (is_quad)
-	{
-		damage *= 4;
-		radius_damage *= 4;
+
+	// If weapon not holstered
+	if (ent->client->pers.hand != 2) {
+
+		if (canCastSpell(ent, 40)) {
+			damage = 100 + (int)(random() * 20.0); // was 100
+			radius_damage = 120; // was 120
+			damage_radius = 120; // was 120
+			if (is_quad)
+			{
+				damage *= 4;
+				radius_damage *= 4;
+			}
+
+			AngleVectors(ent->client->v_angle, forward, right, NULL);
+
+			VectorScale(forward, -2, ent->client->kick_origin);
+			ent->client->kick_angles[0] = -1;
+
+			VectorSet(offset, 8, 8, ent->viewheight - 8);
+			P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+			fire_rocket(ent, start, forward, damage, 325, damage_radius, radius_damage); // speed was 650
+
+			// send muzzle flash
+			gi.WriteByte(svc_muzzleflash);
+			gi.WriteShort(ent - g_edicts);
+			gi.WriteByte(MZ_ROCKET | is_silenced);
+			gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+			ent->client->ps.gunframe++;
+
+			PlayerNoise(ent, start, PNOISE_WEAPON);
+
+			if (!((int)dmflags->value & DF_INFINITE_AMMO))
+				ent->client->pers.inventory[ent->client->ammo_index]--;
+		}
+		else {
+			ent->client->ps.gunframe++;
+		}
 	}
-	
+	else {
+		vec3_t outspawn;
+		outspawn[0] = -999;
+		outspawn[1] = -999;
+		outspawn[2] = -999;
 
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-
-	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
-
-	VectorSet(offset, 8, 8, ent->viewheight-8);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
-	fire_rocket (ent, start, forward, damage, 325, damage_radius, radius_damage); // speed was 650
-
-	// send muzzle flash
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_ROCKET | is_silenced);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
-
-	ent->client->ps.gunframe++;
-
-	PlayerNoise(ent, start, PNOISE_WEAPON);
-
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
+		VectorSet(offset, 24, 8, ent->viewheight - 8);
+		VectorAdd(offset, vec3_origin, offset);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+		ent->client->ps.gunframe++;
+		Interact(ent, start);
+	}
 }
 
 void Weapon_RocketLauncher (edict_t *ent)
@@ -1269,6 +1291,7 @@ void weapon_shotgun_fire (edict_t *ent)
 	// If weapon not holstered
 	if (ent->client->pers.hand != 2) {	
 
+		Melee(ent, start);
 		AngleVectors (ent->client->v_angle, forward, right, NULL);
 		VectorScale (forward, -2, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -2;
@@ -1303,6 +1326,11 @@ void weapon_shotgun_fire (edict_t *ent)
 
 		if (!((int)dmflags->value & DF_INFINITE_AMMO))
 			ent->client->pers.inventory[ent->client->ammo_index]--;
+		
+		VectorSet(offset, 0, 8, 0);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+
+		Melee(ent, start);
 	}
 	else {
 		AngleVectors(ent->client->v_angle, forward, right, NULL);

@@ -366,16 +366,45 @@ void Drop_Weapon (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[index]--;
 }
 
-void Interact(edict_t* ent, vec3_t start) {
+int getSkillReq(edict_t *ent, char *name) {
+	if (name == "weapon_shotgun" || name == "weapon_machinegun") {
+		return WEPSKILL_BLADES;
+	}
+	if (name == "weapon_supershotgun" || name == "weapon_chaingun") {
+		return WEPSKILL_TWOHAND;
+	}
+	if (name == "weapon_blaster") {
+		return WEPSKILL_BOW;
+	}
+	if (name == "weapon_rocketlauncher" || name == "weapon_hyperblaster") {
+		return WEPSKILL_DESTRUCTION;
+	}
+	if (name == "weapon_grenadelauncher" || name == "weapon_railgun") {
+		return WEPSKILL_RESTORATION;
+	}
+	if (name == "weapon_bfg") {
+		return WEPSKILL_ALTERATION;
+	}
+	else {
+		gi.cprintf(ent, PRINT_HIGH, "WEAPON CLASS NOT FOUND");
+		return -1;
+	}
+}
+
+void Interact(edict_t* ent, vec3_t start, vec3_t aimdir) {
 
 	trace_t Interact;
-	vec3_t end;
-	end[0] = 0;
-	end[1] = 0;
-	end[2] = 1;
+	vec3_t		dir;
+	vec3_t		forward, right, up;
+	vec3_t		end;
 
 	Interact = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
 	if (Interact.fraction != 1.0 && Interact.ent->classname == "questgiver") {
+
+		vectoangles(aimdir, dir);
+		AngleVectors(dir, forward, right, up);
+		VectorMA(start, 60, forward, end);
+
 		if (ent->client->pers.questlog[Interact.ent->questNum].queststarted != true) {
 			ent->client->pers.questlog[Interact.ent->questNum] = getQuest(Interact.ent->questNum);
 			gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].introdiag);
@@ -401,19 +430,48 @@ void Interact(edict_t* ent, vec3_t start) {
 	}
 }
 
-void Melee(edict_t* ent, vec3_t start) {
+void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int mod) {
 
-	trace_t Swing;
-	vec3_t end;
-	end[0] = 0;
-	end[1] = 0;
-	end[2] = 1;
+	trace_t		Swing;
+	vec3_t		dir;
+	vec3_t		forward, right, up;
+	vec3_t		end;
 
-	// Testing
 	Swing = gi.trace(ent->s.origin, NULL, NULL, start, ent, CONTENTS_MONSTER);
-	if (Swing.fraction != 1.0) {
-		gi.centerprintf(ent, Swing.ent->classname);
+	if (!(Swing.fraction < 1.0))
+	{
+		vectoangles(aimdir, dir);
+		AngleVectors(dir, forward, right, up);
+		VectorMA(start, 70, forward, end); // was 8192
+
+		Swing = gi.trace(start, NULL, NULL, end, ent, CONTENTS_MONSTER);
+		if (Swing.ent->classname != "questgiver" && Q_strcasecmp(Swing.ent->classname, "WORLDSPAWN")) {
+			gi.cprintf(ent, PRINT_HIGH, Swing.ent->classname);
+			float roll = crandom();
+			if (roll < 0) {
+				roll *= -1;
+			}
+			roll *= 100; // Now our numbers are integers as percents
+
+			// Calculate chance to hit
+			// Morrowind does it like this:
+			// (Weapon Skill + (Agility / 5) + (Luck / 10) * (0.75 + 0.5 * Current Fatigue / Maximum Fatigue) + Fortify Attack Magnitude)
+			float hitrate = (GetWeaponSkill(ent, getSkillReq(ent, ent->client->pers.weapon->classname)) + GetLevelOf(ent, SKILL_AGILITY) / 5.0) * (0.75 + 0.5 * ent->client->pers.fatigue / ent->client->pers.max_fatigue);
+			if (hitrate > roll) {
+				T_Damage(Swing.ent, ent, ent, aimdir, Swing.endpos, Swing.plane.normal, 200, 2, DAMAGE_BULLET, mod);
+				gi.centerprintf(ent, "Hit!");
+			}
+			else {
+				gi.centerprintf(ent, "Miss!"); 
+			}
+			char out[6];
+			itoa(hitrate, out, 10);
+			
+			gi.cprintf(ent, PRINT_HIGH, out);
+		}
 	}
+	
+	
 }
 
 /*
@@ -865,7 +923,7 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 		VectorAdd(offset, vec3_origin, offset);
 		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 		ent->client->ps.gunframe++;
-		Interact(ent, start);
+		Interact(ent, start, forward);
 	}
 }
 
@@ -918,7 +976,7 @@ void Blaster_Fire (edict_t *ent, vec3_t g_offset, int damage, qboolean hyper, in
 		PlayerNoise(ent, start, PNOISE_WEAPON);
 	}
 	else {
-		Interact(ent, start);
+		Interact(ent, start, forward);
 	}
 }
 
@@ -1010,7 +1068,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 				VectorSet(offset, 24, 8, ent->viewheight - 8);
 				VectorAdd(offset, vec3_origin, offset);
 				P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
-				Interact(ent, start);
+				Interact(ent, start, forward);
 			}
 
 			ent->client->ps.gunframe++;
@@ -1291,7 +1349,6 @@ void weapon_shotgun_fire (edict_t *ent)
 	// If weapon not holstered
 	if (ent->client->pers.hand != 2) {	
 
-		Melee(ent, start);
 		AngleVectors (ent->client->v_angle, forward, right, NULL);
 		VectorScale (forward, -2, ent->client->kick_origin);
 		ent->client->kick_angles[0] = -2;
@@ -1313,7 +1370,7 @@ void weapon_shotgun_fire (edict_t *ent)
 		if (deathmatch->value)
 			fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
 		else
-			fire_shotgun(ent, start, forward, damage, kick, hspread, vspread, DEFAULT_SHOTGUN_COUNT, MOD_SHOTGUN);
+			fire_shotgun(ent, start, forward, damage, kick, hspread, vspread, 0, MOD_SHOTGUN); // was DEFAULT_SHOTGUN_COUNT
 
 		// send muzzle flash
 		gi.WriteByte(svc_muzzleflash);
@@ -1322,7 +1379,7 @@ void weapon_shotgun_fire (edict_t *ent)
 		gi.multicast(ent->s.origin, MULTICAST_PVS);
 
 		ent->client->ps.gunframe++;
-		PlayerNoise(ent, start, PNOISE_WEAPON);
+		// PlayerNoise(ent, start, PNOISE_WEAPON);
 
 		if (!((int)dmflags->value & DF_INFINITE_AMMO))
 			ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -1330,7 +1387,7 @@ void weapon_shotgun_fire (edict_t *ent)
 		VectorSet(offset, 0, 8, 0);
 		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-		Melee(ent, start);
+		Melee(ent, start, forward, MOD_SHOTGUN);
 	}
 	else {
 		AngleVectors(ent->client->v_angle, forward, right, NULL);
@@ -1339,7 +1396,7 @@ void weapon_shotgun_fire (edict_t *ent)
 		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 		fire_shotgun(ent, start, forward, damage, kick, 0, 0, 0, MOD_SHOTGUN);
 		ent->client->ps.gunframe++;
-		Interact(ent, start);
+		Interact(ent, start, forward);
 	}
 }
 
@@ -1388,7 +1445,7 @@ void weapon_supershotgun_fire (edict_t *ent)
 		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
 
 		// send muzzle flash
-		gi.WriteByte(svc_muzzleflash);
+		// gi.WriteByte(svc_muzzleflash);
 		gi.WriteShort(ent - g_edicts);
 		gi.WriteByte(MZ_SSHOTGUN | is_silenced);
 		gi.multicast(ent->s.origin, MULTICAST_PVS);
@@ -1406,7 +1463,7 @@ void weapon_supershotgun_fire (edict_t *ent)
 		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 		fire_shotgun(ent, start, forward, damage, kick, 0, 0, 0, MOD_SHOTGUN);
 		ent->client->ps.gunframe++;
-		Interact(ent, start);
+		Interact(ent, start, forward);
 	}
 }
 

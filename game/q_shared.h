@@ -1019,6 +1019,13 @@ typedef enum
 #define SKILL_ENDURANCE			4
 // End Stats
 
+#define WEPSKILL_BLADES			0
+#define WEPSKILL_TWOHAND		1
+#define WEPSKILL_BOW			2
+#define WEPSKILL_DESTRUCTION	3
+#define WEPSKILL_RESTORATION	4
+#define WEPSKILL_ALTERATION		5
+
 // dmflags->value flags
 #define	DF_NO_HEALTH		0x00000001	// 1
 #define	DF_NO_ITEMS			0x00000002	// 2

@@ -927,6 +927,82 @@ void Cmd_HealRPG_f(edict_t* ent) {
 	ent->client->pers.fatigue = ent->client->pers.max_fatigue;
 }
 
+void Cmd_RPGSetStat_f(edict_t* ent, char* target, int desiredlevel) {
+
+	if (Q_stricmp(target, "agility") == 0) {
+		SetLevelOf(ent, SKILL_AGILITY, desiredlevel);
+	}
+	else if (Q_stricmp(target, "endurance") == 0) {
+		SetLevelOf(ent, SKILL_ENDURANCE, desiredlevel);
+	}
+	else if (Q_stricmp(target, "intelligence") == 0) {
+		SetLevelOf(ent, SKILL_INTELLIGENCE, desiredlevel);
+	}
+	else if (Q_stricmp(target, "strength") == 0) {
+		SetLevelOf(ent, SKILL_STRENGTH, desiredlevel);
+	}
+	else if (Q_stricmp(target, "willpower") == 0) {
+		SetLevelOf(ent, SKILL_WILLPOWER, desiredlevel);
+	}
+	else if (Q_stricmp(target, "all") == 0) {
+		SetLevelOf(ent, SKILL_AGILITY, desiredlevel);
+		SetLevelOf(ent, SKILL_ENDURANCE, desiredlevel);
+		SetLevelOf(ent, SKILL_INTELLIGENCE, desiredlevel);
+		SetLevelOf(ent, SKILL_STRENGTH, desiredlevel);
+		SetLevelOf(ent, SKILL_WILLPOWER, desiredlevel);
+	}
+	/*
+	gi.cprintf(ent, PRINT_HIGH, "Set ");
+	gi.cprintf(ent, PRINT_HIGH, target);
+	gi.cprintf(ent, PRINT_HIGH, " to ");
+	gi.cprintf(ent, PRINT_HIGH, desiredlevel);
+	*/
+	
+}
+
+void Cmd_RPGSetSkill_f(edict_t* ent, char* target, int desiredlevel) {
+
+	if (Q_stricmp(target, "blades") == 0) {
+		SetWeaponSkill(ent, WEPSKILL_BLADES, desiredlevel);
+	}
+	else if (Q_stricmp(target, "twohand") == 0) {
+		SetWeaponSkill(ent, WEPSKILL_TWOHAND, desiredlevel);
+	}
+	else if (Q_stricmp(target, "bow") == 0) {
+		SetWeaponSkill(ent, WEPSKILL_BOW, desiredlevel);
+	}
+	else if (Q_stricmp(target, "destruction") == 0) {
+		SetWeaponSkill(ent, WEPSKILL_DESTRUCTION, desiredlevel);
+	}
+	else if (Q_stricmp(target, "restoration") == 0) {
+		SetWeaponSkill(ent, WEPSKILL_RESTORATION, desiredlevel);
+	}
+	else if (Q_stricmp(target, "alteration") == 0) {
+		SetWeaponSkill(ent, WEPSKILL_ALTERATION, desiredlevel);
+	}
+	else if (Q_stricmp(target, "all") == 0) {
+		SetWeaponSkill(ent, WEPSKILL_BLADES, desiredlevel);
+		SetWeaponSkill(ent, WEPSKILL_TWOHAND, desiredlevel);
+		SetWeaponSkill(ent, WEPSKILL_BOW, desiredlevel);
+		SetWeaponSkill(ent, WEPSKILL_DESTRUCTION, desiredlevel);
+		SetWeaponSkill(ent, WEPSKILL_RESTORATION, desiredlevel);
+		SetWeaponSkill(ent, WEPSKILL_ALTERATION, desiredlevel);
+	}
+	/*
+	gi.cprintf(ent, PRINT_HIGH, "Set ");
+	gi.cprintf(ent, PRINT_HIGH, target);
+	gi.cprintf(ent, PRINT_HIGH, " to ");
+	gi.cprintf(ent, PRINT_HIGH, desiredlevel);
+	*/
+}
+
+void Cmd_SetMagicka_f(edict_t *ent, int amount) {
+	ent->client->pers.magicka = amount;
+}
+
+void Cmd_SetFatigue_f(edict_t* ent, int amount) {
+	ent->client->pers.fatigue = amount;
+}
 
 
 /*
@@ -1035,6 +1111,18 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp(cmd, "rpgheal") == 0) {
 		Cmd_HealRPG_f(ent);
+	}
+	else if (Q_stricmp(cmd, "rpgsetstat") == 0) {
+		Cmd_RPGSetStat_f(ent, gi.argv(1), atoi(gi.argv(2)));
+	}
+	else if (Q_stricmp(cmd, "rpgsetskill") == 0) {
+		Cmd_RPGSetSkill_f(ent, gi.argv(1), atoi(gi.argv(2)));
+	}
+	else if (Q_stricmp(cmd, "setmagicka") == 0) {
+		Cmd_SetMagicka_f(ent, atoi(gi.argv(1)));
+	}
+	else if (Q_stricmp(cmd, "setfatigue") == 0) {
+		Cmd_SetFatigue_f(ent, atoi(gi.argv(1)));
 	}
 	// End Custom Commands
 	else	// anything that doesn't match a command will be a chat

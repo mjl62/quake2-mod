@@ -722,10 +722,84 @@ int GetLevelOf(edict_t* ent, int skill) {
 		return ent->client->pers.stat_endurance;
 	}
 	else {
-		return 0;
+		gi.cprintf(ent, PRINT_HIGH, "COULD NOT FIND SKILL");
+		return -1;
 	}
 }
 
+// Matthew LiDonni
+// Returns as an int, removing the decimal
+void SetLevelOf(edict_t* ent, int skill, int newlevel) {
+	if (skill == SKILL_STRENGTH) {
+		ent->client->pers.stat_strength = newlevel;
+	}
+	else if (skill == SKILL_INTELLIGENCE) {
+		ent->client->pers.stat_intelligence = newlevel;
+	}
+	else if (skill == SKILL_WILLPOWER) {
+		ent->client->pers.stat_willpower = newlevel;
+	}
+	else if (skill == SKILL_AGILITY) {
+		ent->client->pers.stat_agility = newlevel;
+	}
+	else if (skill == SKILL_ENDURANCE) {
+		ent->client->pers.stat_endurance = newlevel;
+	}
+	else {
+		gi.cprintf(ent, PRINT_HIGH, "COULD NOT FIND SKILL");
+		return -1;
+	}
+}
+
+int GetWeaponSkill(edict_t* ent, int skill) {
+	if (skill == WEPSKILL_BLADES) {
+		return ent->client->pers.skill_blades;
+	}
+	else if (skill == WEPSKILL_TWOHAND) {
+		return ent->client->pers.skill_twohand;
+	}
+	else if (skill == WEPSKILL_BOW) {
+		return ent->client->pers.skill_bow;
+	}
+	else if (skill == WEPSKILL_DESTRUCTION) {
+		return ent->client->pers.skill_destruction;
+	}
+	else if (skill == WEPSKILL_RESTORATION) {
+		return ent->client->pers.skill_restoration;
+	}
+	else if (skill == WEPSKILL_ALTERATION) {
+		return ent->client->pers.skill_alteration;
+	}
+	else {
+		gi.cprintf(ent, PRINT_HIGH, "COULD NOT FIND SKILL");
+		return -1;
+	}
+}
+
+void SetWeaponSkill(edict_t* ent, int skill, int newlevel) {
+	if (skill == WEPSKILL_BLADES) {
+		ent->client->pers.skill_blades = newlevel;
+	}
+	else if (skill == WEPSKILL_TWOHAND) {
+		ent->client->pers.skill_twohand = newlevel;
+	}
+	else if (skill == WEPSKILL_BOW) {
+		ent->client->pers.skill_bow = newlevel;
+	}
+	else if (skill == WEPSKILL_DESTRUCTION) {
+		ent->client->pers.skill_destruction = newlevel;
+	}
+	else if (skill == WEPSKILL_RESTORATION) {
+		ent->client->pers.skill_restoration = newlevel;
+	}
+	else if (skill == WEPSKILL_ALTERATION) {
+		ent->client->pers.skill_alteration = newlevel;
+	}
+	else {
+		gi.cprintf(ent, PRINT_HIGH, "COULD NOT FIND SKILL");
+		return -1;
+	}
+}
 
 /*
 =======================================================================

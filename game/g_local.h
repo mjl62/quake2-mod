@@ -756,6 +756,10 @@ void InitClientResp (gclient_t *client);
 void InitBodyQue (void);
 void ClientBeginServerFrame (edict_t *ent);
 qboolean canCastSpell(edict_t* ent, int magickacost);
+int GetLevelOf(edict_t* ent, int skill);
+int GetWeaponSkill(edict_t* ent, int skill);
+void SetLevelOf(edict_t* ent, int skill, int newlevel);
+void SetWeaponSkill(edict_t* ent, int skill, int newlevel);
 
 //
 // g_player.c

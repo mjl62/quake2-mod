@@ -758,8 +758,13 @@ void ClientBeginServerFrame (edict_t *ent);
 qboolean canCastSpell(edict_t* ent, int magickacost);
 int GetLevelOf(edict_t* ent, int skill);
 int GetWeaponSkill(edict_t* ent, int skill);
+float GetWeaponXP(edict_t* ent, int skill);
 void SetLevelOf(edict_t* ent, int skill, int newlevel);
-void SetWeaponSkill(edict_t* ent, int skill, int newlevel);
+void SetWeaponSkill(edict_t* ent, int skill, float newlevel);
+void grantXP(edict_t* ent, int xp);
+void grantCurrWeapXP(edict_t* ent, float xp);
+int	getSkillReq(edict_t* ent, char* name);
+
 
 //
 // g_player.c
@@ -897,6 +902,10 @@ typedef struct
 	int			magicka;
 	int			max_magicka;
 	
+	// XP
+	int			xp;
+	int			level;
+
 	// Stats (Floats, will drop the decimal off in "GetLevelOf" method, so each level will be for every 1)
 	float		stat_strength; // Increase weapon damage and max fatigue
 	float		stat_intelligence; // Increase magic damage and maximum magicka

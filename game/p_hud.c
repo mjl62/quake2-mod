@@ -464,6 +464,7 @@ void ShowRPGStats(edict_t* ent)
 		sk = "hard+";
 
 	// Matthew LiDonni
+	char level[32] = "";
 
 	char row1[64] = "";
 	char row2[64] = "";
@@ -474,6 +475,17 @@ void ShowRPGStats(edict_t* ent)
 	char row7[64] = "";
 
 	char skillLevel[2];
+	char characterLevel[2];
+	char characterXP[6];
+
+	// Level
+	strcpy(level, "Level: ");
+	itoa(ent->client->pers.level, characterLevel, 10);
+	strcat(level, characterLevel);
+	strcat(level, "    XP: ");
+	itoa(ent->client->pers.xp, characterXP, 10);
+	strcat(level, characterXP);
+
 	// Row 1
 	strcpy(row1, "Strength: ");
 	itoa(ent->client->pers.stat_strength, skillLevel, 10);
@@ -555,7 +567,8 @@ void ShowRPGStats(edict_t* ent)
 
 	// send the layout
 	Com_sprintf(string, sizeof(string),
-		""	
+		""
+		"xv 202 yv 12 string2 \"%s\" " // Level
 		"xv 0 yv 24 cstring2 \"%s\" "	// Title 1
 		"xv 0 yv 48 cstring2 \"%s\" "	// row 1
 		"xv 0 yv 64 cstring2 \"%s\" "  // row 2
@@ -566,6 +579,7 @@ void ShowRPGStats(edict_t* ent)
 		"xv 0 yv 176 cstring2 \"%s\" "  // row 6
 		"xv 0 yv 196 cstring2 \"%s\" " // row 7
 		,
+		level,
 		"Main Attributes:",
 		row1,
 		row2,

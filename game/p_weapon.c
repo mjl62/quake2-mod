@@ -411,11 +411,12 @@ void Interact(edict_t* ent, vec3_t start, vec3_t aimdir) {
 
 		}
 		else if (ent->client->pers.questlog[Interact.ent->questNum].questcompleted == false) {
-			// CHECK IF QUEST COMPLETE: 
+
 			if (ent->client->pers.questlog[Interact.ent->questNum].kills >= ent->client->pers.questlog[Interact.ent->questNum].killsneeded) // ADD OR FOR AN OBJECTIVE BEING COMPLETE
 			{
 				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].completediag);
 				ent->client->pers.questlog[Interact.ent->questNum].questcompleted = true;
+				grantXP(ent, ent->client->pers.questlog[Interact.ent->questNum].rewardXP);
 			}
 			else {
 				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].inprogressdiag);
@@ -446,7 +447,6 @@ void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int mod) {
 
 		Swing = gi.trace(start, NULL, NULL, end, ent, CONTENTS_MONSTER);
 		if (Swing.ent->classname != "questgiver" && Q_strcasecmp(Swing.ent->classname, "WORLDSPAWN")) {
-			gi.cprintf(ent, PRINT_HIGH, Swing.ent->classname);
 			float roll = crandom();
 			if (roll < 0) {
 				roll *= -1;
@@ -459,10 +459,10 @@ void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int mod) {
 			float hitrate = (GetWeaponSkill(ent, getSkillReq(ent, ent->client->pers.weapon->classname)) + GetLevelOf(ent, SKILL_AGILITY) / 5.0) * (0.75 + 0.5 * ent->client->pers.fatigue / ent->client->pers.max_fatigue);
 			if (hitrate > roll) {
 				T_Damage(Swing.ent, ent, ent, aimdir, Swing.endpos, Swing.plane.normal, 200, 2, DAMAGE_BULLET, mod);
-				gi.centerprintf(ent, "Hit!");
+				
 			}
 			else {
-				gi.centerprintf(ent, "Miss!"); 
+				
 			}
 			char out[6];
 			itoa(hitrate, out, 10);
@@ -1361,11 +1361,9 @@ void weapon_shotgun_fire (edict_t *ent)
 			damage *= 4;
 			kick *= 4;
 		}
-		// Custom code Matthew LiDonni
+
 		int hspread = 500; // was 500
 		int vspread = 500; // was 500
-
-		// End custom code
 
 		if (deathmatch->value)
 			fire_shotgun(ent, start, forward, damage, kick, 500, 500, DEFAULT_DEATHMATCH_SHOTGUN_COUNT, MOD_SHOTGUN);
@@ -1379,7 +1377,7 @@ void weapon_shotgun_fire (edict_t *ent)
 		gi.multicast(ent->s.origin, MULTICAST_PVS);
 
 		ent->client->ps.gunframe++;
-		// PlayerNoise(ent, start, PNOISE_WEAPON);
+		//PlayerNoise(ent, start, PNOISE_WEAPON);
 
 		if (!((int)dmflags->value & DF_INFINITE_AMMO))
 			ent->client->pers.inventory[ent->client->ammo_index]--;
@@ -1445,7 +1443,7 @@ void weapon_supershotgun_fire (edict_t *ent)
 		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
 
 		// send muzzle flash
-		// gi.WriteByte(svc_muzzleflash);
+		gi.WriteByte(svc_muzzleflash);
 		gi.WriteShort(ent - g_edicts);
 		gi.WriteByte(MZ_SSHOTGUN | is_silenced);
 		gi.multicast(ent->s.origin, MULTICAST_PVS);

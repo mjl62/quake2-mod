@@ -642,6 +642,9 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.fatigue = 100;
 	client->pers.max_fatigue = 100;
 
+	client->pers.xp = 0;
+	client->pers.level = 1;
+
 	// Stats will default to level 1
 	client->pers.stat_strength = 1.0;
 	client->pers.stat_intelligence = 1.0;
@@ -751,6 +754,7 @@ void SetLevelOf(edict_t* ent, int skill, int newlevel) {
 	}
 }
 
+// Returns level of weapon skill
 int GetWeaponSkill(edict_t* ent, int skill) {
 	if (skill == WEPSKILL_BLADES) {
 		return ent->client->pers.skill_blades;
@@ -776,7 +780,34 @@ int GetWeaponSkill(edict_t* ent, int skill) {
 	}
 }
 
-void SetWeaponSkill(edict_t* ent, int skill, int newlevel) {
+// Gets weapon XP (solid integers are levels, decimal is % of level)
+float GetWeaponXP(edict_t* ent, int skill) {
+	if (skill == WEPSKILL_BLADES) {
+		return ent->client->pers.skill_blades;
+	}
+	else if (skill == WEPSKILL_TWOHAND) {
+		return ent->client->pers.skill_twohand;
+	}
+	else if (skill == WEPSKILL_BOW) {
+		return ent->client->pers.skill_bow;
+	}
+	else if (skill == WEPSKILL_DESTRUCTION) {
+		return ent->client->pers.skill_destruction;
+	}
+	else if (skill == WEPSKILL_RESTORATION) {
+		return ent->client->pers.skill_restoration;
+	}
+	else if (skill == WEPSKILL_ALTERATION) {
+		return ent->client->pers.skill_alteration;
+	}
+	else {
+		gi.cprintf(ent, PRINT_HIGH, "COULD NOT FIND SKILL");
+		return -1;
+	}
+}
+
+// Sets weapon XP (solid integers are levels, decimal is % of level)
+void SetWeaponSkill(edict_t* ent, int skill, float newlevel) {
 	if (skill == WEPSKILL_BLADES) {
 		ent->client->pers.skill_blades = newlevel;
 	}
@@ -1937,6 +1968,105 @@ qboolean canCastSpell(edict_t* ent, int magickacost) {
 	}
 	gi.centerprintf(ent, "Not enough magicka.");
 	return false;
-	
+}
 
+void levelUp(edict_t* ent, int newlevel) {
+	ent->client->pers.level = newlevel;
+	char lvlmsg[32];
+	strcpy(lvlmsg, "Level ");
+	char lvlchar[3];
+	itoa(newlevel, lvlchar, 10);
+	strcat(lvlmsg, lvlchar);
+	strcat(lvlmsg, " Reached");
+	gi.centerprintf(ent, lvlmsg);
+
+}
+
+void grantXP(edict_t* ent, int xp) {
+	ent->client->pers.xp += xp;
+	char xpmessage[32];
+	strcpy(xpmessage, "Gained ");
+	char xpchar[4];
+	itoa(xp, xpchar, 10);
+	strcat(xpmessage, xpchar);
+	strcat(xpmessage, " experience.\n");
+	gi.cprintf(ent, PRINT_CHAT, xpmessage);
+	// 20 is XP per lvl, we start at level 1 so we add 1
+	if (1 + (ent->client->pers.xp/20) > ent->client->pers.level) {
+		levelUp(ent, 1 + (ent->client->pers.xp/20));
+	}
+
+}
+
+void grantCurrWeapXP(edict_t* ent, float xp) {
+	int skill = getSkillReq(ent, ent->client->pers.weapon->classname);
+	char skillname[32];
+	int previouslvl = GetWeaponSkill(ent, skill);
+	SetWeaponSkill(ent, skill, GetWeaponXP(ent, skill) + xp);
+
+	if (GetWeaponSkill(ent, skill) > previouslvl) {
+		if (skill == WEPSKILL_BLADES) {
+			strcpy(skillname, "Blades");
+		}
+		else if (skill == WEPSKILL_TWOHAND) {
+			strcpy(skillname, "Two-Handed");
+		}
+		else if (skill == WEPSKILL_BOW) {
+			strcpy(skillname, "Bows");
+		}
+		else if (skill == WEPSKILL_DESTRUCTION) {
+			strcpy(skillname, "Destruction");
+		}
+		else if (skill == WEPSKILL_RESTORATION) {
+			strcpy(skillname, "Restoration");
+		}
+		else if (skill == WEPSKILL_ALTERATION) {
+			strcpy(skillname, "Alteration");
+		}
+		strcat(skillname, " skill increased to ");
+		char skillchar[3];
+		itoa(GetWeaponSkill(ent, skill), skillchar, 10);
+		strcat(skillname, skillchar);
+		strcat(skillname, "\n");
+		gi.cprintf(ent, PRINT_CHAT, skillname);
+	}
+
+	/*
+	if (skill == WEPSKILL_BLADES) {
+		previousxp = ent->client->pers.skill_blades;
+		ent->client->pers.skill_blades += xp;
+		strcpy(skillname, "Blades");
+	}
+	else if (skill == WEPSKILL_TWOHAND) {
+		previousxp = ent->client->pers.skill_twohand;
+		ent->client->pers.skill_twohand += xp;
+		strcpy(skillname, "Two-Handed");
+	}
+	else if (skill == WEPSKILL_BOW) {
+		previousxp = ent->client->pers.skill_bow;
+		ent->client->pers.skill_bow += xp;
+		strcpy(skillname, "Bows");
+	}
+	else if (skill == WEPSKILL_DESTRUCTION) {
+		previousxp = ent->client->pers.skill_destruction;
+		ent->client->pers.skill_destruction += xp;
+		strcpy(skillname, "Destruction");
+	}
+	else if (skill == WEPSKILL_RESTORATION) {
+		previousxp = ent->client->pers.skill_restoration;
+		ent->client->pers.skill_restoration += xp;
+		strcpy(skillname, "Restoration");
+	}
+	else if (skill == WEPSKILL_ALTERATION) {
+		previousxp = ent->client->pers.skill_alteration;
+		ent->client->pers.skill_alteration += xp;
+		strcpy(skillname, "Alteration");
+	}
+	else {
+		gi.cprintf(ent, PRINT_HIGH, "COULD NOT FIND SKILL");
+		return;
+	}
+	*/
+
+	
 }

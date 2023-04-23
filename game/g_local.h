@@ -655,7 +655,8 @@ void vectoangles (vec3_t vec, vec3_t angles);
 qboolean OnSameTeam (edict_t *ent1, edict_t *ent2);
 qboolean CanDamage (edict_t *targ, edict_t *inflictor);
 void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod);
-void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_t *ignore, float radius, int mod);
+void T_RadiusDamage(edict_t* inflictor, edict_t* attacker, float damage, edict_t* ignore, float radius, int mod);
+
 
 // damage flags
 #define DAMAGE_RADIUS			0x00000001	// damage was indirect
@@ -672,6 +673,24 @@ void T_RadiusDamage (edict_t *inflictor, edict_t *attacker, float damage, edict_
 #define DEFAULT_DEATHMATCH_SHOTGUN_COUNT	12
 #define DEFAULT_SHOTGUN_COUNT	12
 #define DEFAULT_SSHOTGUN_COUNT	20
+
+
+// vvvvvv Status Flags vvvvvv
+
+//		Restores (Potions and spells)
+#define STATUS_RESTORE_HEALTH		0
+#define STATUS_RESTORE_FATIGUE		1
+#define STATUS_RESTORE_MAGICKA		2
+
+//		Damage
+#define STATUS_POISON				5
+
+
+//		Other effects (Levitation, Reinforce)
+#define STATUS_FORTIFY_RESISTANCE	10
+#define STATUS_LEVITATE				11
+
+// ^^^^^^ Status Flags ^^^^^^
 
 //
 // g_monster.c
@@ -694,6 +713,10 @@ void M_CatagorizePosition (edict_t *ent);
 qboolean M_CheckAttack (edict_t *self);
 void M_FlyCheck (edict_t *self);
 void M_CheckGround (edict_t *ent);
+
+void inflictStatus(edict_t* target, edict_t* inflictor, int type, int ticks, int strength);
+void tickStatusEffects(edict_t* self);
+void initStatus(edict_t* self);
 
 //
 // g_misc.c
@@ -1170,5 +1193,27 @@ struct edict_s
 
 	// Questgiver data (Matthew LiDonni)
 	int			questNum;
+
+	// Status effect data
+	int			healRestStrength;
+	int			healRestTicks;
+
+	int			fatigueRestStrength;
+	int			fatigueRestTicks;
+
+	int			magickaRestStrength;
+	int			magickaRestTicks;
+
+	int			poisonStrength;
+	int			poisonTicks;
+	edict_t*	poisonInflictor;
+
+	int			fortResStrength;
+	int			fortResTicks;
+
+	int			leviatateTicks;
+
+	int			nextStatusTickTime;
+
 };
 

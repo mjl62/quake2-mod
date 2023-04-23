@@ -370,7 +370,7 @@ int getSkillReq(edict_t *ent, char *name) {
 	if (name == "weapon_shotgun" || name == "weapon_machinegun") {
 		return WEPSKILL_BLADES;
 	}
-	if (name == "weapon_supershotgun" || name == "weapon_chaingun") {
+	if (Q_stricmp(name, "weapon_supershotgun") == 0 || Q_stricmp(name, "weapon_chaingun") == 0) {
 		return WEPSKILL_TWOHAND;
 	}
 	if (name == "weapon_blaster") {
@@ -429,9 +429,13 @@ void Interact(edict_t* ent, vec3_t start, vec3_t aimdir) {
 			gi.bprintf(PRINT_CHAT, "Something went wrong with the quest interaction...\n");
 		}
 	}
+	if (Interact.fraction != 1.0 && Interact.ent->classname == "questitem") {
+		ent->client->pers.questlog[Interact.ent->questNum].kills += 1;
+		G_FreeEdict(Interact.ent);
+	}
 }
 
-void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int mod) {
+void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int damage, int mod) {
 
 	trace_t		Swing;
 	vec3_t		dir;
@@ -458,8 +462,7 @@ void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int mod) {
 			// (Weapon Skill + (Agility / 5) + (Luck / 10) * (0.75 + 0.5 * Current Fatigue / Maximum Fatigue) + Fortify Attack Magnitude)
 			float hitrate = (GetWeaponSkill(ent, getSkillReq(ent, ent->client->pers.weapon->classname)) + GetLevelOf(ent, SKILL_AGILITY) / 5.0) * (0.75 + 0.5 * ent->client->pers.fatigue / ent->client->pers.max_fatigue);
 			if (hitrate > roll) {
-				T_Damage(Swing.ent, ent, ent, aimdir, Swing.endpos, Swing.plane.normal, 200, 2, DAMAGE_BULLET, mod);
-				
+				T_Damage(Swing.ent, ent, ent, aimdir, Swing.endpos, Swing.plane.normal, damage, 2, DAMAGE_BULLET, mod);
 			}
 			else {
 				
@@ -929,10 +932,10 @@ void Weapon_RocketLauncher_Fire (edict_t *ent)
 
 void Weapon_RocketLauncher (edict_t *ent)
 {
-	static int	pause_frames[]	= {25, 33, 42, 50, 0};
-	static int	fire_frames[]	= {5, 0};
+	static int	pause_frames[]	= {25, 33, 42, 50, 0}; // was static int	pause_frames[]	= {25, 33, 42, 50, 0};
+	static int	fire_frames[]	= {12, 0}; // was static int	fire_frames[]	= {5, 0};
 
-	Weapon_Generic (ent, 4, 12, 50, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+	Weapon_Generic (ent, 4, 15, 48, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
 }
 
 
@@ -1042,7 +1045,8 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 						damage = 15;
 					else
 						damage = 20;
-					Blaster_Fire(ent, offset, damage, true, effect);
+					// Damage to 1 since its a poison spell, and 0 is making it not work
+					Blaster_Fire(ent, offset, 1, true, effect);
 					if (!((int)dmflags->value & DF_INFINITE_AMMO))
 						ent->client->pers.inventory[ent->client->ammo_index]--;
 
@@ -1378,14 +1382,14 @@ void weapon_shotgun_fire (edict_t *ent)
 
 		ent->client->ps.gunframe++;
 		//PlayerNoise(ent, start, PNOISE_WEAPON);
-
+		/*
 		if (!((int)dmflags->value & DF_INFINITE_AMMO))
 			ent->client->pers.inventory[ent->client->ammo_index]--;
-		
+		*/
 		VectorSet(offset, 0, 8, 0);
 		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-		Melee(ent, start, forward, MOD_SHOTGUN);
+		Melee(ent, start, forward, 10, MOD_SHOTGUN);
 	}
 	else {
 		AngleVectors(ent->client->v_angle, forward, right, NULL);
@@ -1437,10 +1441,10 @@ void weapon_supershotgun_fire (edict_t *ent)
 		v[YAW] = ent->client->v_angle[YAW] - 5;
 		v[ROLL] = ent->client->v_angle[ROLL];
 		AngleVectors(v, forward, NULL, NULL);
-		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
+		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, 0, MOD_SSHOTGUN);
 		v[YAW] = ent->client->v_angle[YAW] + 5;
 		AngleVectors(v, forward, NULL, NULL);
-		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, DEFAULT_SSHOTGUN_COUNT / 2, MOD_SSHOTGUN);
+		fire_shotgun(ent, start, forward, damage, kick, DEFAULT_SHOTGUN_HSPREAD, DEFAULT_SHOTGUN_VSPREAD, 0, MOD_SSHOTGUN);
 
 		// send muzzle flash
 		gi.WriteByte(svc_muzzleflash);
@@ -1450,9 +1454,11 @@ void weapon_supershotgun_fire (edict_t *ent)
 
 		ent->client->ps.gunframe++;
 		PlayerNoise(ent, start, PNOISE_WEAPON);
-
+		/*
 		if (!((int)dmflags->value & DF_INFINITE_AMMO))
 			ent->client->pers.inventory[ent->client->ammo_index] -= 2;
+		*/
+		Melee(ent, start, forward, 22, MOD_SSHOTGUN);
 	}
 	else {
 		AngleVectors(ent->client->v_angle, forward, right, NULL);

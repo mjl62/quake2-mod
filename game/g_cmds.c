@@ -911,6 +911,21 @@ void Cmd_ToggleHolster_f(edict_t* ent) {
 	}
 }
 
+void Cmd_SpawnQuests_f(edict_t* ent) {
+	if (Q_stricmp(level.mapname, "base1") == 0) {
+		vec3_t o = { 153, -100, 46 };
+		vec3_t a = { 0, 178, 0 };
+		SP_QuestGiver(ent, o, a, 0);
+		vec3_t o2 = { 153, -200, 46 };
+		vec3_t a2 = { 0, 178, 0 };
+		SP_QuestGiver(ent, o2, a2, 1);
+		vec3_t o3 = { 425, -72, -197 };
+		vec3_t a3 = { 0, 178, 0 };
+		SP_QuestItem_ring(ent, o3, a3, 1);
+	}
+
+}
+
 void Cmd_GetQuestLog_f(edict_t* ent) {
 	for (int i = 0; i < 5; i++) {
 		if (ent->client->pers.questlog[i].queststarted && !ent->client->pers.questlog[i].questcompleted) {
@@ -1096,12 +1111,7 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp(cmd, "holster") == 0)
 		Cmd_ToggleHolster_f(ent);
 	else if (Q_stricmp(cmd, "questgiver") == 0) {
-		vec3_t o = { 153, -140, 46 };
-		vec3_t a = { 0, 178, 0 };
-		SP_QuestGiver(ent, o, a, 0);
-		vec3_t o2 = { 153, -200, 46 };
-		vec3_t a2 = { 0, 178, 0 };
-		SP_QuestGiver(ent, o2, a2, 1);
+		Cmd_SpawnQuests_f(ent);
 	}
 	else if (Q_stricmp(cmd, "journal") == 0) {
 		Cmd_GetQuestLog_f(ent);

@@ -1457,7 +1457,7 @@ always owned, never in the world
 		Weapon_RocketLauncher,
 		"misc/w_pkup.wav",
 		"models/weapons/g_rocket/tris.md2", EF_ROTATE,
-		"models/weapons/v_rocket/tris.md2",
+		"models/weapons/v_handgr/tris.md2", // was models/weapons/v_rocket/tris.md2
 /* icon */		"w_rlauncher",
 /* pickup */	"Rocket Launcher",
 		0,

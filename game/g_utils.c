@@ -549,12 +549,20 @@ of ent.  Ent should be unlinked before calling this!
 qboolean KillBox (edict_t *ent)
 {
 	trace_t		tr;
+	trace_t		questkiller;
 
 	while (1)
 	{
 		tr = gi.trace (ent->s.origin, ent->mins, ent->maxs, ent->s.origin, NULL, MASK_PLAYERSOLID);
 		if (!tr.ent)
 			break;
+
+		questkiller = gi.trace(ent->s.origin, ent->mins, ent->maxs, ent->s.origin - 2, NULL, MASK_MONSTERSOLID);
+
+		if (Q_stricmp(questkiller.ent->classname, "questgiver") == 0) {
+			T_Damage(questkiller.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);
+			break;
+		}
 
 		// nail it
 		T_Damage (tr.ent, ent, ent, vec3_origin, ent->s.origin, vec3_origin, 100000, 0, DAMAGE_NO_PROTECTION, MOD_TELEFRAG);

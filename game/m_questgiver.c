@@ -195,33 +195,47 @@ quest getQuest(int questNum) {
 	return q;
 }
 
+void questgiver_die (edict_t* self, edict_t* inflictor, edict_t* attacker, int damage, vec3_t point) {
+	int i;
+	if (self->health > self->gib_health) {
+		self->takedamage = DAMAGE_NO;
+	}
+	G_FreeEdict(self);
+}
+
 
 
 // Spawn function
 void SP_QuestGiver(edict_t* ent, vec3_t spawn_origin_q, vec3_t spawn_angles_q, int questNum) {
 	edict_t* newQuestGiver;
-
+	 
 	newQuestGiver = G_Spawn();
 	VectorCopy(spawn_origin_q, spawn_angles_q);
 	newQuestGiver->s.origin[0] = spawn_origin_q[0];
 	newQuestGiver->s.origin[1] = spawn_origin_q[1];
-	newQuestGiver->s.origin[2] = spawn_origin_q[2] - 22;  // Prevents clipping into ground
+	newQuestGiver->s.origin[2] = spawn_origin_q[2] - 18;  // Prevents clipping into ground
 	newQuestGiver->classname = "questgiver"; // Class name
-	newQuestGiver->takedamage = DAMAGE_NO; // Should take no damage, but maybe change this later
+	newQuestGiver->takedamage = DAMAGE_NO_KNOCKBACK; 
+	newQuestGiver->movetype = MOVETYPE_STOP;
 	newQuestGiver->mass = 200; // Mass of npc
 	newQuestGiver->solid = SOLID_BBOX; // Physics interaction
 	newQuestGiver->deadflag = DEAD_NO; // Not dead
 	newQuestGiver->clipmask = MASK_MONSTERSOLID; // clipmask layer (Interaction is set to monsters, so if you change one you have to change the other)
-	newQuestGiver->model = "players/female/tris.md2"; // Not 100% sure what i'm getting here
-	newQuestGiver->s.modelindex = 255; // or here
-	newQuestGiver->s.skinnum = 4;
+	//newQuestGiver->model = "players/male/tris.md2"; // Not 100% sure what i'm getting here
+	//newQuestGiver->s.modelindex = 255; // or here
+	//newQuestGiver->s.skinnum = 2;
+	//newQuestGiver->s.modelindex = gi.modelindex("models/npcs/fem/tris.md2");
+	newQuestGiver->model = "players/male/tris.md2";
+	newQuestGiver->s.modelindex = 255;
 	newQuestGiver->s.frame = 0; // Animation frame start maybe?
 	newQuestGiver->waterlevel = 0; // Idk they arent gonna swim
 	newQuestGiver->waterlevel = 0;
 
-	newQuestGiver->health = 100;
-	newQuestGiver->max_health = 100;
-	newQuestGiver->gib_health = -40; // How much damage to gib (non-applicable bc DAMAGE_NO)
+	newQuestGiver->health = 500;
+	newQuestGiver->max_health = 500;
+	newQuestGiver->gib_health = -999999; // How much damage to gib (non-applicable bc DAMAGE_NO)
+
+	newQuestGiver->die = questgiver_die;
 
 	// Uses infantry stand and fidget as animations
 	newQuestGiver->monsterinfo.stand = questgiver_stand; 
@@ -238,7 +252,7 @@ void SP_QuestGiver(edict_t* ent, vec3_t spawn_origin_q, vec3_t spawn_angles_q, i
 
 	// Quest information
 	newQuestGiver->questNum = questNum;
-
+	
 	VectorSet(newQuestGiver->mins, -16, -16, -32);
 	VectorSet(newQuestGiver->maxs, 16, 16, 32);
 	VectorClear(newQuestGiver->velocity);
@@ -246,9 +260,105 @@ void SP_QuestGiver(edict_t* ent, vec3_t spawn_origin_q, vec3_t spawn_angles_q, i
 	KillBox(newQuestGiver); // Kill anything in the way of our new NPC when spawning (MUST BE DONE WHEN NOT LINKED)
 
 	gi.linkentity(newQuestGiver); // Link entity to game
-	gi.cprintf(ent, PRINT_HIGH, "Spawned a new quest giver!\n");
 
 }
+
+void SP_QuestGiver_zero(edict_t* self) {
+	self->classname = "questgiver"; // Class name
+	self->takedamage = DAMAGE_NO_KNOCKBACK; // Should take no damage, but maybe change this later
+	self->mass = 200; // Mass of npc
+	self->solid = SOLID_BBOX; // Physics interaction
+	self->deadflag = DEAD_NO; // Not dead
+	self->clipmask = MASK_MONSTERSOLID; // clipmask layer (Interaction is set to monsters, so if you change one you have to change the other)
+	self->model = "players/male/tris.md2"; // Not 100% sure what i'm getting here
+	self->s.modelindex = 255; // or here
+	self->s.skinnum = 2;
+	self->s.frame = 0; // Animation frame start maybe?
+	self->waterlevel = 0; // Idk they arent gonna swim
+	self->waterlevel = 0;
+
+	self->health = 100;
+	self->max_health = 100;
+	self->gib_health = -999999; // How much damage to gib (non-applicable bc DAMAGE_NO)
+
+	// Uses infantry stand and fidget as animations
+	self->monsterinfo.stand = questgiver_stand;
+	self->monsterinfo.idle = questgiver_fidget;
+
+	self->think = questgiver_fidget;
+	self->nextthink = level.time + 0.1;
+
+	// Quest information
+	self->questNum = 0;
+
+	VectorSet(self->mins, -16, -16, -32);
+	VectorSet(self->maxs, 16, 16, 32);
+	VectorClear(self->velocity);
+
+	KillBox(self); // Kill anything in the way of our new NPC when spawning (MUST BE DONE WHEN NOT LINKED)
+
+	gi.linkentity(self); // Link entity to game
+}
+
+void questItemThink(edict_t* self) {
+	// Game crashes without a think method here
+
+
+}
+
+void SP_QuestItem_ring(edict_t* ent, vec3_t spawn_origin_q, vec3_t spawn_angles_q, int questNum) {
+
+	edict_t* newQuestItem;
+
+	newQuestItem = G_Spawn();
+
+	VectorCopy(spawn_origin_q, spawn_angles_q);
+	newQuestItem->s.origin[0] = spawn_origin_q[0];
+	newQuestItem->s.origin[1] = spawn_origin_q[1];
+	newQuestItem->s.origin[2] = spawn_origin_q[2] - 18;  // Prevents clipping into ground
+	newQuestItem->classname = "questitem"; // Class name
+	newQuestItem->takedamage = DAMAGE_NO_KNOCKBACK;
+	newQuestItem->movetype = MOVETYPE_STOP;
+	newQuestItem->mass = 200; // Mass of npc
+	newQuestItem->solid = SOLID_BBOX; // Physics interaction
+	newQuestItem->deadflag = DEAD_NO; // Not dead
+	newQuestItem->clipmask = MASK_MONSTERSOLID; // clipmask layer (Interaction is set to monsters, so if you change one you have to change the other)
+	newQuestItem->s.modelindex = gi.modelindex("models/objects/quest2item/tris.md2");
+	newQuestItem->s.frame = 0; // Animation frame start maybe?
+	newQuestItem->waterlevel = 0; // Idk they arent gonna swim
+	newQuestItem->waterlevel = 0;
+
+	newQuestItem->health = 500;
+	newQuestItem->max_health = 500;
+	newQuestItem->gib_health = -999999; // How much damage to gib (non-applicable bc DAMAGE_NO)
+
+	newQuestItem->die = questgiver_die;
+
+	newQuestItem->nextthink = level.time + 0.1;
+
+	// Set rotation 
+	newQuestItem->yaw_speed = 20;
+	newQuestItem->s.angles[0] = 0;
+	newQuestItem->s.angles[1] = spawn_angles_q[1];
+	newQuestItem->s.angles[2] = 0;
+
+	newQuestItem->think = questItemThink;
+
+	// Quest information
+	newQuestItem->questNum = questNum;
+
+	VectorSet(newQuestItem->mins, -16, -16, -32);
+	VectorSet(newQuestItem->maxs, 16, 16, 32);
+	VectorClear(newQuestItem->velocity);
+
+	KillBox(newQuestItem); // Kill anything in the way of our new NPC when spawning (MUST BE DONE WHEN NOT LINKED)
+
+	gi.linkentity(newQuestItem); // Link entity to game
+
+	
+}
+
+
 
 
 

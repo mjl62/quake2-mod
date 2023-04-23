@@ -415,6 +415,71 @@ void M_MoveFrame (edict_t *self)
 		move->frame[index].thinkfunc (self);
 }
 
+// If potion, inflictor can be NULL, if levitate, strength can be NULL. Values should NEVER be negative.
+void inflictStatus(edict_t* target, edict_t* inflictor, int type, int ticks, int strength) {
+	
+	if (type == STATUS_RESTORE_HEALTH) {
+		target->healRestTicks += ticks;
+		target->healRestStrength += strength;
+	}
+	else if (type == STATUS_RESTORE_FATIGUE) {
+		target->fatigueRestTicks += ticks;
+		target->fatigueRestStrength += strength;
+	}
+	else if (type == STATUS_RESTORE_MAGICKA) {
+		target->magickaRestTicks += ticks;
+		target->magickaRestStrength += strength;
+	}
+	else if (type == STATUS_POISON) {
+		target->poisonInflictor = inflictor;
+		target->poisonTicks += ticks;
+		target->poisonStrength = strength;
+	}
+	else if (type == STATUS_FORTIFY_RESISTANCE) {
+		target->fortResTicks += ticks;
+		target->fortResStrength = strength;
+	}
+	else if (type == STATUS_LEVITATE) {
+		target->leviatateTicks += ticks;
+	}
+	else {
+		gi.bprintf(PRINT_HIGH, "ERROR: Status effect unknown, no status was applied.");
+	}
+}
+
+void tickStatusEffects(edict_t* self) {
+	if (self->poisonTicks > 0) {
+		if (level.time > self->nextStatusTickTime) {
+			self->poisonTicks -= 1;
+			self->health -= self->poisonStrength;
+			T_Damage(self, self->poisonInflictor, self->poisonInflictor, NULL, NULL, NULL, self->poisonStrength, 0, NULL, MOD_HYPERBLASTER);
+			self->nextStatusTickTime = level.time + 1;
+			gi.bprintf(PRINT_HIGH, "POISON TICKED");
+		}
+		
+		
+	}
+}
+
+void initStatus(edict_t* self) {
+	self->healRestTicks = 0;
+	self->healRestStrength = 0;
+
+	self->fatigueRestStrength = 0;
+	self->fatigueRestTicks = 0;
+	self->magickaRestStrength = 0;
+	self->magickaRestTicks = 0;
+
+	self->poisonTicks = 0;
+	self->poisonStrength = 0;
+	self->poisonInflictor = NULL;
+
+	self->fortResStrength = 0;
+	self->fortResTicks = 0;
+
+	self->leviatateTicks = 0;
+}
+
 
 void monster_think (edict_t *self)
 {
@@ -427,6 +492,9 @@ void monster_think (edict_t *self)
 	M_CatagorizePosition (self);
 	M_WorldEffects (self);
 	M_SetEffects (self);
+
+
+	tickStatusEffects(self);
 }
 
 
@@ -561,6 +629,9 @@ qboolean monster_start (edict_t *self)
 	self->s.skinnum = 0;
 	self->deadflag = DEAD_NO;
 	self->svflags &= ~SVF_DEADMONSTER;
+
+	initStatus(self);
+	
 
 	if (!self->monsterinfo.checkattack)
 		self->monsterinfo.checkattack = M_CheckAttack;

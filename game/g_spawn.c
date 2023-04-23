@@ -137,12 +137,19 @@ void SP_monster_supertank (edict_t *self);
 void SP_monster_boss2 (edict_t *self);
 void SP_monster_jorg (edict_t *self);
 void SP_monster_boss3_stand (edict_t *self);
+void SP_QuestGiver_zero(edict_t* self);
+void SpawnQuestGiver(int questnum);
+void SP_QuestGiver_one(edict_t *self);
+void SP_QuestGiver_two(edict_t* self);
+void SP_QuestGiver_three(edict_t* self);
+void SP_QuestGiver_four(edict_t* self);
 
 void SP_monster_commander_body (edict_t *self);
 
 void SP_turret_breach (edict_t *self);
 void SP_turret_base (edict_t *self);
 void SP_turret_driver (edict_t *self);
+
 
 
 spawn_t	spawns[] = {
@@ -258,6 +265,7 @@ spawn_t	spawns[] = {
 	{"monster_boss2", SP_monster_boss2},
 	{"monster_boss3_stand", SP_monster_boss3_stand},
 	{"monster_jorg", SP_monster_jorg},
+	{"questgiver", SP_QuestGiver_zero},
 
 	{"monster_commander_body", SP_monster_commander_body},
 

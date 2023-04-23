@@ -658,6 +658,10 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.skill_destruction = 5;
 	client->pers.skill_restoration = 5;
 	client->pers.skill_alteration = 5;
+
+	initStatus(client);
+
+
 }
 
 
@@ -1501,6 +1505,9 @@ void ClientBegin (edict_t *ent)
 		}
 	}
 
+	// Matthew LiDonni (Init quest shit for level)
+	gi.AddCommandString("questgiver");
+
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
 }
@@ -2000,7 +2007,7 @@ void grantXP(edict_t* ent, int xp) {
 
 void grantCurrWeapXP(edict_t* ent, float xp) {
 	int skill = getSkillReq(ent, ent->client->pers.weapon->classname);
-	char skillname[32];
+	char skillname[48];
 	int previouslvl = GetWeaponSkill(ent, skill);
 	SetWeaponSkill(ent, skill, GetWeaponXP(ent, skill) + xp);
 

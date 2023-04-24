@@ -415,25 +415,45 @@ void M_MoveFrame (edict_t *self)
 		move->frame[index].thinkfunc (self);
 }
 
+void initStatus(edict_t* self) {
+	self->healRestTicks = 0;
+	self->healRestStrength = 0;
+
+	self->fatigueRestStrength = 0;
+	self->fatigueRestTicks = 0;
+
+	self->magickaRestStrength = 0;
+	self->magickaRestTicks = 0;
+
+	self->poisonTicks = 0;
+	self->poisonStrength = 0;
+
+	self->fortResStrength = 0;
+	self->fortResTicks = 0;
+
+	self->leviatateTicks = 0;
+}
+
+
 // If potion, inflictor can be NULL, if levitate, strength can be NULL. Values should NEVER be negative.
 void inflictStatus(edict_t* target, edict_t* inflictor, int type, int ticks, int strength) {
 	
 	if (type == STATUS_RESTORE_HEALTH) {
 		target->healRestTicks += ticks;
-		target->healRestStrength += strength;
+		target->healRestStrength = strength;
 	}
 	else if (type == STATUS_RESTORE_FATIGUE) {
 		target->fatigueRestTicks += ticks;
-		target->fatigueRestStrength += strength;
+		target->fatigueRestStrength = strength;
 	}
 	else if (type == STATUS_RESTORE_MAGICKA) {
 		target->magickaRestTicks += ticks;
-		target->magickaRestStrength += strength;
+		target->magickaRestStrength = strength;
 	}
 	else if (type == STATUS_POISON) {
-		target->poisonInflictor = inflictor;
 		target->poisonTicks += ticks;
 		target->poisonStrength = strength;
+		target->poisonInflictor = inflictor;
 	}
 	else if (type == STATUS_FORTIFY_RESISTANCE) {
 		target->fortResTicks += ticks;
@@ -442,43 +462,32 @@ void inflictStatus(edict_t* target, edict_t* inflictor, int type, int ticks, int
 	else if (type == STATUS_LEVITATE) {
 		target->leviatateTicks += ticks;
 	}
-	else {
-		gi.bprintf(PRINT_HIGH, "ERROR: Status effect unknown, no status was applied.");
-	}
+	
+
 }
 
 void tickStatusEffects(edict_t* self) {
+	if (self->healRestTicks > 0) {
+		if (level.time > self->nextStatusTickTime) {
+			self->healRestTicks -= 1;
+			self->health += self->healRestStrength;
+			if (self->health + self->healRestStrength > self->max_health) {
+				self->health = self->max_health;
+			}
+			self->nextStatusTickTime = level.time + 1;
+		}
+	}
+
 	if (self->poisonTicks > 0) {
 		if (level.time > self->nextStatusTickTime) {
 			self->poisonTicks -= 1;
-			self->health -= self->poisonStrength;
-			T_Damage(self, self->poisonInflictor, self->poisonInflictor, NULL, NULL, NULL, self->poisonStrength, 0, NULL, MOD_HYPERBLASTER);
-			self->nextStatusTickTime = level.time + 1;
-			gi.bprintf(PRINT_HIGH, "POISON TICKED");
+			T_Damage(self, self->poisonInflictor, self->poisonInflictor, vec3_origin, vec3_origin, vec3_origin, self->poisonStrength, 1, 732, MOD_HYPERBLASTER);
+			self->nextStatusTickTime = level.time + 1;		
 		}
-		
-		
 	}
+	
 }
 
-void initStatus(edict_t* self) {
-	self->healRestTicks = 0;
-	self->healRestStrength = 0;
-
-	self->fatigueRestStrength = 0;
-	self->fatigueRestTicks = 0;
-	self->magickaRestStrength = 0;
-	self->magickaRestTicks = 0;
-
-	self->poisonTicks = 0;
-	self->poisonStrength = 0;
-	self->poisonInflictor = NULL;
-
-	self->fortResStrength = 0;
-	self->fortResTicks = 0;
-
-	self->leviatateTicks = 0;
-}
 
 
 void monster_think (edict_t *self)

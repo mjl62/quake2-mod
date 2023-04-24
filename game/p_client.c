@@ -645,6 +645,8 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.xp = 0;
 	client->pers.level = 1;
 
+	client->pers.statpoints = 8;
+
 	// Stats will default to level 1
 	client->pers.stat_strength = 1.0;
 	client->pers.stat_intelligence = 1.0;
@@ -659,7 +661,7 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.skill_restoration = 5;
 	client->pers.skill_alteration = 5;
 
-	initStatus(client);
+	client->showapplystat = false;
 
 
 }
@@ -1904,6 +1906,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (other->inuse && other->client->chase_target == ent)
 			UpdateChaseCam(other);
 	}
+
+	ent->nextStatusTickTime
 }
 
 
@@ -1977,6 +1981,10 @@ qboolean canCastSpell(edict_t* ent, int magickacost) {
 	return false;
 }
 
+int getResistance(ent) {
+	// player resistance will be natural resistance + armor
+}
+
 void levelUp(edict_t* ent, int newlevel) {
 	ent->client->pers.level = newlevel;
 	char lvlmsg[32];
@@ -1986,6 +1994,10 @@ void levelUp(edict_t* ent, int newlevel) {
 	strcat(lvlmsg, lvlchar);
 	strcat(lvlmsg, " Reached");
 	gi.centerprintf(ent, lvlmsg);
+	ent->client->pers.statpoints += 3;
+	ent->health = ent->max_health;
+	ent->client->pers.fatigue = ent->client->pers.max_fatigue;
+	ent->client->pers.magicka = ent->client->pers.max_magicka;
 
 }
 
@@ -2001,6 +2013,9 @@ void grantXP(edict_t* ent, int xp) {
 	// 20 is XP per lvl, we start at level 1 so we add 1
 	if (1 + (ent->client->pers.xp/20) > ent->client->pers.level) {
 		levelUp(ent, 1 + (ent->client->pers.xp/20));
+		ent->health = ent->max_health;
+		ent->client->pers.fatigue = ent->client->pers.max_fatigue;
+		ent->client->pers.magicka = ent->client->pers.max_magicka;
 	}
 
 }

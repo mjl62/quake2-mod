@@ -602,6 +602,8 @@ extern	gitem_t	itemlist[];
 void Cmd_Help_f (edict_t *ent);
 void Cmd_Score_f (edict_t *ent);
 void Cmd_ShowRPGStat_f(edict_t* ent);
+void Cmd_ShowApplyStats_f(edict_t* ent);
+
 
 //
 // g_items.c
@@ -860,6 +862,31 @@ void GetChaseTarget(edict_t *ent);
 #define	ANIM_REVERSE	6
 
 // Matthew LiDonni
+
+#define ITEMTYPE_ARMOR_HEAD		0
+#define ITEMTYPE_ARMOR_CHEST	1
+#define ITEMTYPE_ARMOR_LEGS		2
+#define ITEMTYPE_HEALING_POT	5
+#define ITEMTYPE_FATIGUE_POT	6
+#define ITEMTYPE_MAGICKA_POT	7
+#define ITEMTYPE_FORTIFY_POT	8
+#define ITEMTYPE_LEVITATE_POT	9
+
+#define BONUSSTAT_HEALTH_MAX		0
+#define BONUSSTAT_FATIGUE_REGEN		1
+#define BONUSSTAT_MAGICKA_COST		2
+#define BONUSSTAT_RICOCHET			3
+
+// Custom Items
+typedef struct {
+	int			itemType;  
+	int			armorResistance;
+	int			bonusStatType;
+
+
+
+} mwItem;
+
 // Quests
 typedef struct {
 	int			questNum;
@@ -928,6 +955,8 @@ typedef struct
 	// XP
 	int			xp;
 	int			level;
+
+	int			statpoints; // Start with 8, get 3 every level to spend on your main stats
 
 	// Stats (Floats, will drop the decimal off in "GetLevelOf" method, so each level will be for every 1)
 	float		stat_strength; // Increase weapon damage and max fatigue
@@ -1040,6 +1069,9 @@ struct gclient_s
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
+
+	qboolean	showapplystat;
+
 };
 
 

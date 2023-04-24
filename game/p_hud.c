@@ -277,6 +277,7 @@ void Cmd_Score_f (edict_t *ent)
 {
 	ent->client->showinventory = false;
 	ent->client->showhelp = false;
+	ent->client->showapplystat = false;
 
 	if (!deathmatch->value && !coop->value)
 		return;
@@ -444,6 +445,7 @@ void Cmd_Help_f (edict_t *ent)
 
 	ent->client->showhelp = true;
 	ent->client->pers.helpchanged = 0;
+	ent->client->showapplystat = false;
 	HelpComputer (ent);
 }
 
@@ -617,7 +619,149 @@ void Cmd_ShowRPGStat_f(edict_t* ent)
 
 	ent->client->showhelp = true;
 	ent->client->pers.helpchanged = 0;
+	ent->client->showapplystat = false;
 	ShowRPGStats(ent);
+}
+
+void ShowApplyStats(edict_t* ent)
+{
+	char	string[2048]; // was 1024
+
+	// Matthew LiDonni
+	char level[32] = "";
+
+	char row1[64] = "";
+	char row2[64] = "";
+	char row3[64] = "";
+	char row4[64] = "";
+	char row5[64] = "";
+	char row6[64] = "";
+	char row7[64] = "";
+
+	char skillLevel[2];
+	char characterLevel[2];
+	char characterXP[6];
+
+	// Level
+	strcpy(level, "Level: ");
+	itoa(ent->client->pers.level, characterLevel, 10);
+	strcat(level, characterLevel);
+	strcat(level, "    XP: ");
+	itoa(ent->client->pers.xp, characterXP, 10);
+	strcat(level, characterXP);
+
+	// Row 2
+	strcpy(row2, "Strength: ");
+	itoa(ent->client->pers.stat_strength, skillLevel, 10);
+	strcat(row2, skillLevel);
+	
+	// Row 3
+	strcat(row3, "Intelligence: ");
+	itoa(ent->client->pers.stat_intelligence, skillLevel, 10);
+	strcat(row3, skillLevel);
+
+	// Row 4
+	strcpy(row4, "Willpower: ");
+	itoa(ent->client->pers.stat_willpower, skillLevel, 10);
+	strcat(row4, skillLevel);
+
+	// Row 5
+	strcpy(row5, "Agility: ");
+	itoa(ent->client->pers.stat_agility, skillLevel, 10);
+	strcat(row5, skillLevel);
+
+	// Row 6
+	strcpy(row6, "Endurance: ");
+	itoa(ent->client->pers.stat_endurance, skillLevel, 10);
+	strcat(row6, skillLevel);
+	 
+	// Row 7
+	strcpy(row7, "Health: ");
+	itoa(ent->health, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "/");
+	itoa(ent->max_health, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "    ");
+	strcat(row7, "Fatigue: ");
+	itoa(ent->client->pers.fatigue, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "/");
+	itoa(ent->client->pers.max_fatigue, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "    ");
+	strcat(row7, "Magicka: ");
+	itoa(ent->client->pers.magicka, skillLevel, 10);
+	strcat(row7, skillLevel);
+	strcat(row7, "/");
+	itoa(ent->client->pers.max_magicka, skillLevel, 10);
+	strcat(row7, skillLevel);
+
+	// Row 1 Do this here so we can add button prompts if needed
+	if (ent->client->pers.statpoints > 0) {
+		strcpy(row1, "Unspent Points: ");
+		itoa(ent->client->pers.statpoints, skillLevel, 10);
+		strcat(row1, skillLevel);
+		strcat(row2, "    Press F8 to apply points");
+		strcat(row3, "    Press F9 to apply points");
+		strcat(row4, "    Press F10 to apply points");
+		strcat(row5, "    Press F11 to apply points");
+		strcat(row6, "    Press F12 to apply points");
+	}
+
+	// send the layout
+	Com_sprintf(string, sizeof(string),
+		""
+		"xv 202 yv 12 string2 \"%s\" " // Level   XP
+		"xv 0 yv 24 cstring2 \"%s\" "	// Points to Apply
+		"xv 0 yv 54 cstring2 \"%s\" "	// row 1 - Unspent Points
+		"xv 0 yv 74 cstring2 \"%s\" "  // row 2 - Strength
+		"xv 0 yv 94 cstring2 \"%s\" "  // row 3 - Intelligence
+		"xv 0 yv 114 cstring2 \"%s\" "  // row 4 - Willpower
+		"xv 0 yv 134 cstring2 \"%s\" "  // row 5 - Agility
+		"xv 0 yv 154 cstring2 \"%s\" "  // row 6 - Endurance
+		"xv 0 yv 174 cstring2 \"%s\" "  // row 7 - Health/Fatigue/Magicka
+		"xv 0 yv 194 cstring2 \"%s\" " 
+		,
+		level,
+		"",
+		row1,
+		row2,
+		row3,
+		row4,
+		row5,
+		row6,
+		row7
+	);
+
+	gi.WriteByte(svc_layout);
+	gi.WriteString(string);
+	gi.unicast(ent, true);
+}
+
+void Cmd_ShowApplyStats_f(edict_t* ent)
+{
+	// this is for backwards compatability
+	if (deathmatch->value)
+	{
+		Cmd_Score_f(ent);
+		return;
+	}
+
+	ent->client->showinventory = false;
+	ent->client->showscores = false;
+	ent->client->showapplystat = true;
+
+	// TODO set up my own show command like this
+	if (ent->client->showhelp && (ent->client->pers.game_helpchanged == game.helpchanged))
+	{
+		ent->client->showhelp = false;
+		return;
+	}
+
+	ent->client->showhelp = true;
+	ent->client->pers.helpchanged = 0;
+	ShowApplyStats(ent);
 }
 
 

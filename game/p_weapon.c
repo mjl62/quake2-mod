@@ -414,9 +414,9 @@ void Interact(edict_t* ent, vec3_t start, vec3_t aimdir) {
 
 			if (ent->client->pers.questlog[Interact.ent->questNum].kills >= ent->client->pers.questlog[Interact.ent->questNum].killsneeded) // ADD OR FOR AN OBJECTIVE BEING COMPLETE
 			{
+				grantXP(ent, ent->client->pers.questlog[Interact.ent->questNum].rewardXP);
 				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].completediag);
 				ent->client->pers.questlog[Interact.ent->questNum].questcompleted = true;
-				grantXP(ent, ent->client->pers.questlog[Interact.ent->questNum].rewardXP);
 			}
 			else {
 				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].inprogressdiag);
@@ -460,22 +460,32 @@ void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int damage, int mod) {
 			// Calculate chance to hit
 			// Morrowind does it like this:
 			// (Weapon Skill + (Agility / 5) + (Luck / 10) * (0.75 + 0.5 * Current Fatigue / Maximum Fatigue) + Fortify Attack Magnitude)
-			float hitrate = (GetWeaponSkill(ent, getSkillReq(ent, ent->client->pers.weapon->classname)) + GetLevelOf(ent, SKILL_AGILITY) / 5.0) * (0.75 + 0.5 * ent->client->pers.fatigue / ent->client->pers.max_fatigue);
+			float hitrate = (GetWeaponSkill(ent, getSkillReq(ent, ent->client->pers.weapon->classname)) * 2 + 10 + GetLevelOf(ent, SKILL_AGILITY) / 2.0) * (0.75 + 0.5 * ent->client->pers.fatigue / ent->client->pers.max_fatigue);
 			if (hitrate > roll) {
+				gi.centerprintf(ent, "");
 				T_Damage(Swing.ent, ent, ent, aimdir, Swing.endpos, Swing.plane.normal, damage, 2, DAMAGE_BULLET, mod);
+				
+				// Hit sound
+				//gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
+				
 			}
 			else {
-				
+				gi.centerprintf(ent, "Miss!");
+				// Whoosh sound
+				//gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
 			}
 			char out[6];
 			itoa(hitrate, out, 10);
-			
 			gi.cprintf(ent, PRINT_HIGH, out);
+			gi.cprintf(ent, PRINT_HIGH, "/");
+			itoa(roll, out, 10);
+			gi.cprintf(ent, PRINT_HIGH, out);
+			gi.cprintf(ent, PRINT_HIGH, "     ");
 		}
 	}
-	
-	
 }
+
+
 
 /*
 ================
@@ -817,44 +827,96 @@ GRENADE LAUNCHER
 ======================================================================
 */
 
-void weapon_grenadelauncher_fire (edict_t *ent)
+void weapon_grenadelauncher_fire(edict_t* ent)
 {
-	vec3_t	offset;
+	vec3_t	offset, start;
 	vec3_t	forward, right;
-	vec3_t	start;
-	int		damage = 120;
-	float	radius;
+	int		damage;
+	float	damage_radius;
+	int		radius_damage;
+	// If weapon not holstered
+	if (ent->client->pers.hand != 2) {
 
-	radius = damage+40;
-	if (is_quad)
-		damage *= 4;
+		damage = 30;
+		float	radius;
 
-	VectorSet(offset, 8, 8, ent->viewheight-8);
-	AngleVectors (ent->client->v_angle, forward, right, NULL);
-	P_ProjectSource (ent->client, ent->s.origin, offset, forward, right, start);
+		radius = damage + 40;
+		
+		damage = GetLevelOf(ent, SKILL_INTELLIGENCE) * 2 + 20;
 
-	VectorScale (forward, -2, ent->client->kick_origin);
-	ent->client->kick_angles[0] = -1;
+		VectorSet(offset, 8, 8, ent->viewheight - 8);
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
 
-	fire_grenade (ent, start, forward, damage, 600, 2.5, radius);
+		VectorScale(forward, -2, ent->client->kick_origin);
+		ent->client->kick_angles[0] = -1;
 
-	gi.WriteByte (svc_muzzleflash);
-	gi.WriteShort (ent-g_edicts);
-	gi.WriteByte (MZ_GRENADE | is_silenced);
-	gi.multicast (ent->s.origin, MULTICAST_PVS);
+		//fire_grenade(ent, start, forward, damage, 600, 2.5, radius);
+		
+		// Heal self:
+		if (canCastSpell(ent, 40)) {
+			float roll = crandom();
+			if (roll < 0) {
+				roll *= -1;
+			}
+			roll *= 100; // Now our numbers are integers as percents
+			// Calculate chance to hit
+			// Morrowind does it like this:
+			// (Weapon Skill + (Agility / 5) + (Luck / 10) * (0.75 + 0.5 * Current Fatigue / Maximum Fatigue) + Fortify Attack Magnitude)
+			float castchance = (GetWeaponSkill(ent, getSkillReq(ent, ent->client->pers.weapon->classname)) * 2 + 10 + GetLevelOf(ent, SKILL_WILLPOWER) / 2.0) * (0.75 + 0.5 * ent->client->pers.fatigue / ent->client->pers.max_fatigue);
+			if (castchance > roll) {
+				gi.centerprintf(ent, "");
+				ent->health += damage;
+				if (ent->health > ent->max_health) {
+					ent->health = ent->max_health;
+					grantCurrWeapXP(ent, .25);
+				}
+				// Spell sound
+				//gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
+			}
+			else {
+				gi.centerprintf(ent, "Spellcast Failed!");
+				// Failed spell sound
+				//gi.sound(ent, CHAN_AUTO, gi.soundindex("weapons/chngnu1a.wav"), 1, ATTN_IDLE, 0);
+			}
+			char out[6];
+			itoa(castchance, out, 10);
+			gi.cprintf(ent, PRINT_HIGH, out);
+			gi.cprintf(ent, PRINT_HIGH, "/");
+			itoa(roll, out, 10);
+			gi.cprintf(ent, PRINT_HIGH, out);
+			gi.cprintf(ent, PRINT_HIGH, "    ");
 
-	ent->client->ps.gunframe++;
 
-	PlayerNoise(ent, start, PNOISE_WEAPON);
+			
+		}
 
-	if (! ( (int)dmflags->value & DF_INFINITE_AMMO ) )
-		ent->client->pers.inventory[ent->client->ammo_index]--;
+		gi.WriteByte(svc_muzzleflash);
+		gi.WriteShort(ent - g_edicts);
+		gi.WriteByte(MZ_GRENADE | is_silenced);
+		gi.multicast(ent->s.origin, MULTICAST_PVS);
+
+		ent->client->ps.gunframe++;
+		ent->client->ps.gunframe++;
+
+		PlayerNoise(ent, start, PNOISE_WEAPON);
+	}
+	else {
+
+		AngleVectors(ent->client->v_angle, forward, right, NULL);
+		VectorSet(offset, 24, 8, ent->viewheight - 8);
+		VectorAdd(offset, vec3_origin, offset);
+		P_ProjectSource(ent->client, ent->s.origin, offset, forward, right, start);
+		ent->client->ps.gunframe++;
+		Interact(ent, start, forward);
+	}
+
 }
 
 void Weapon_GrenadeLauncher (edict_t *ent)
 {
 	static int	pause_frames[]	= {34, 51, 59, 0};
-	static int	fire_frames[]	= {6, 0};
+	static int	fire_frames[]	= {14, 0};
 
 	Weapon_Generic (ent, 5, 16, 59, 64, pause_frames, fire_frames, weapon_grenadelauncher_fire);
 }
@@ -935,7 +997,7 @@ void Weapon_RocketLauncher (edict_t *ent)
 	static int	pause_frames[]	= {25, 33, 42, 50, 0}; // was static int	pause_frames[]	= {25, 33, 42, 50, 0};
 	static int	fire_frames[]	= {12, 0}; // was static int	fire_frames[]	= {5, 0};
 
-	Weapon_Generic (ent, 4, 15, 48, 54, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
+	Weapon_Generic (ent, 4, 15, 47, 48, pause_frames, fire_frames, Weapon_RocketLauncher_Fire);
 }
 
 
@@ -1037,18 +1099,14 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 					offset[1] = 0;
 					offset[2] = 4 * cos(rotation);
 
-					if ((ent->client->ps.gunframe == 6) || (ent->client->ps.gunframe == 9))
-						effect = EF_HYPERBLASTER;
-					else
-						effect = 0;
-					if (deathmatch->value)
-						damage = 15;
-					else
-						damage = 20;
+					//if ((ent->client->ps.gunframe == 6) || (ent->client->ps.gunframe == 9))
+					effect = EF_HYPERBLASTER;
+
 					// Damage to 1 since its a poison spell, and 0 is making it not work
-					Blaster_Fire(ent, offset, 1, true, effect);
-					if (!((int)dmflags->value & DF_INFINITE_AMMO))
-						ent->client->pers.inventory[ent->client->ammo_index]--;
+					damage = 1;
+					if (canCastSpell(ent, 20)) {
+						Blaster_Fire(ent, offset, damage, true, effect);
+					}
 
 					ent->client->anim_priority = ANIM_ATTACK;
 					if (ent->client->ps.pmove.pm_flags & PMF_DUCKED)
@@ -1092,7 +1150,7 @@ void Weapon_HyperBlaster_Fire (edict_t *ent)
 void Weapon_HyperBlaster (edict_t *ent)
 {
 	static int	pause_frames[]	= {0};
-	static int	fire_frames[]	= {6, 7, 8, 9, 10, 11, 0};
+	static int	fire_frames[]	= {6, 0}; //6, 7, 8, 9, 10, 11, 0
 
 	Weapon_Generic (ent, 5, 20, 49, 53, pause_frames, fire_frames, Weapon_HyperBlaster_Fire);
 }

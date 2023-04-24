@@ -472,6 +472,7 @@ void Cmd_Inven_f (edict_t *ent)
 
 	cl->showscores = false;
 	cl->showhelp = false;
+	cl->showapplystat = false;
 
 	if (cl->showinventory)
 	{
@@ -1003,12 +1004,6 @@ void Cmd_RPGSetSkill_f(edict_t* ent, char* target, int desiredlevel) {
 		SetWeaponSkill(ent, WEPSKILL_RESTORATION, desiredlevel);
 		SetWeaponSkill(ent, WEPSKILL_ALTERATION, desiredlevel);
 	}
-	/*
-	gi.cprintf(ent, PRINT_HIGH, "Set ");
-	gi.cprintf(ent, PRINT_HIGH, target);
-	gi.cprintf(ent, PRINT_HIGH, " to ");
-	gi.cprintf(ent, PRINT_HIGH, desiredlevel);
-	*/
 }
 
 void Cmd_SetMagicka_f(edict_t *ent, int amount) {
@@ -1017,6 +1012,41 @@ void Cmd_SetMagicka_f(edict_t *ent, int amount) {
 
 void Cmd_SetFatigue_f(edict_t* ent, int amount) {
 	ent->client->pers.fatigue = amount;
+}
+
+void Cmd_ApplyStatPoint_f(edict_t* ent, char* statname) {
+	if (ent->client->pers.statpoints > 0) {
+		if (Q_stricmp(statname, "strength") == 0) {
+			ent->client->pers.stat_strength++;
+			ent->client->pers.max_fatigue += 4;
+		}
+		else if (Q_stricmp(statname, "intelligence") == 0) {
+			ent->client->pers.stat_intelligence++;
+			ent->client->pers.max_magicka += 10;
+		}
+		else if (Q_stricmp(statname, "willpower") == 0) {
+			ent->client->pers.stat_willpower++;
+			ent->client->pers.max_fatigue += 5;
+		}
+		else if (Q_stricmp(statname, "agility") == 0) {
+			ent->client->pers.stat_agility++;
+			ent->client->pers.max_fatigue += 8;
+		}
+		else if (Q_stricmp(statname, "endurance") == 0) {
+			ent->client->pers.stat_endurance++;
+			ent->max_health += 10;
+			ent->client->pers.max_health += 10;
+			ent->client->pers.max_fatigue += 5;
+		}
+		else {
+			gi.bprintf(PRINT_HIGH, "ERROR: Tried to apply stat point to non-existent stat. No points spent.");
+			return;
+		}
+		ent->client->pers.statpoints--;
+		// Close and reopen instantly, making it seem like the menu updates in real time.
+		Cmd_ShowApplyStats_f(ent);
+		Cmd_ShowApplyStats_f(ent);
+	}
 }
 
 
@@ -1119,6 +1149,9 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp(cmd, "rpgstats") == 0) {
 		Cmd_ShowRPGStat_f(ent);
 	}
+	else if (Q_stricmp(cmd, "rpgpoints") == 0) {
+		Cmd_ShowApplyStats_f(ent);
+	}
 	else if (Q_stricmp(cmd, "rpgheal") == 0) {
 		Cmd_HealRPG_f(ent);
 	}
@@ -1133,6 +1166,9 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp(cmd, "setfatigue") == 0) {
 		Cmd_SetFatigue_f(ent, atoi(gi.argv(1)));
+	}
+	else if (Q_stricmp(cmd, "applypoints") == 0) {
+		Cmd_ApplyStatPoint_f(ent, gi.argv(1));
 	}
 	// End Custom Commands
 	else	// anything that doesn't match a command will be a chat

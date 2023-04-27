@@ -131,6 +131,8 @@ quest getQuest(int questNum) {
 		q.kills = 0;
 		q.killsneeded = 5;
 		q.rewardXP = 25;
+		q.rewardItem = RPGITEM_HEALTHPOT;
+		q.rewardQuantity = 2;
 	}
 	else if (questNum == 1) {
 		q.questNum = 1;
@@ -146,21 +148,25 @@ quest getQuest(int questNum) {
 		q.kills = 0;
 		q.killsneeded = 1;
 		q.rewardXP = 25;
+		q.rewardItem = RPGITEM_MAGICKAPOT;
+		q.rewardQuantity = 3;
 	}
 	else if (questNum == 2) {
 		q.questNum = 2;
 		q.queststarted = true;
 		q.questcompleted = false;
-		strcpy(q.questname, "QuestName");
-		strcpy(q.questdesc, "Desc");
-		strcpy(q.introdiag, "IntroDialogue\n");
-		strcpy(q.inprogressdiag, "InProgressDialogue\n");
-		strcpy(q.completediag, "Complete Dialogue\n");
-		strcpy(q.postdiag, "PostDialogue\n");
-		strcpy(q.killclassname, "none");
+		strcpy(q.questname, "Mail Man");
+		strcpy(q.questdesc, "Deliver the letter.");
+		strcpy(q.introdiag, "Hey friend, I've got a letter that needs to be delivered, could you help me out?\n");
+		strcpy(q.inprogressdiag, "The guy lives near a sewer entrance.\n");
+		strcpy(q.completediag, "Thanks.\n");
+		strcpy(q.postdiag, "Thanks again, I appreciate the help!\n");
+		strcpy(q.killclassname, "");
 		q.kills = 0;
 		q.killsneeded = 1;
-		q.rewardXP = 50;
+		q.rewardXP = 25;
+		q.rewardItem = RPGITEM_CHESTARMOR;
+		q.rewardQuantity = 1;
 	}
 	else if (questNum == 3) {
 		q.questNum = 3;
@@ -176,6 +182,8 @@ quest getQuest(int questNum) {
 		q.kills = 0;
 		q.killsneeded = 1;
 		q.rewardXP = 50;
+		q.rewardItem = NULL;
+		q.rewardQuantity = 0;
 	}
 	else if (questNum == 4) {
 		q.questNum = 4;
@@ -191,6 +199,8 @@ quest getQuest(int questNum) {
 		q.kills = 0;
 		q.killsneeded = 1;
 		q.rewardXP = 50;
+		q.rewardItem = NULL;
+		q.rewardQuantity = 0;
 	}
 	return q;
 }
@@ -354,9 +364,66 @@ void SP_QuestItem_ring(edict_t* ent, vec3_t spawn_origin_q, vec3_t spawn_angles_
 	KillBox(newQuestItem); // Kill anything in the way of our new NPC when spawning (MUST BE DONE WHEN NOT LINKED)
 
 	gi.linkentity(newQuestItem); // Link entity to game
-
-	
 }
+
+// Spawn function
+void SP_MailRecipient(edict_t* ent, vec3_t spawn_origin_q, vec3_t spawn_angles_q, int questNum) {
+	edict_t* newQuestGiver;
+
+	newQuestGiver = G_Spawn();
+	VectorCopy(spawn_origin_q, spawn_angles_q);
+	newQuestGiver->s.origin[0] = spawn_origin_q[0];
+	newQuestGiver->s.origin[1] = spawn_origin_q[1];
+	newQuestGiver->s.origin[2] = spawn_origin_q[2] - 18;  // Prevents clipping into ground
+	newQuestGiver->classname = "mailrecipient"; // Class name
+	newQuestGiver->takedamage = DAMAGE_NO_KNOCKBACK;
+	newQuestGiver->movetype = MOVETYPE_STOP;
+	newQuestGiver->mass = 200; // Mass of npc
+	newQuestGiver->solid = SOLID_BBOX; // Physics interaction
+	newQuestGiver->deadflag = DEAD_NO; // Not dead
+	newQuestGiver->clipmask = MASK_MONSTERSOLID; // clipmask layer (Interaction is set to monsters, so if you change one you have to change the other)
+	//newQuestGiver->model = "players/male/tris.md2"; // Not 100% sure what i'm getting here
+	//newQuestGiver->s.modelindex = 255; // or here
+	//newQuestGiver->s.skinnum = 2;
+	//newQuestGiver->s.modelindex = gi.modelindex("models/npcs/fem/tris.md2");
+	newQuestGiver->model = "players/male/tris.md2";
+	newQuestGiver->s.modelindex = 255;
+	newQuestGiver->s.frame = 0; // Animation frame start maybe?
+	newQuestGiver->waterlevel = 0; // Idk they arent gonna swim
+	newQuestGiver->waterlevel = 0;
+
+	newQuestGiver->health = 500;
+	newQuestGiver->max_health = 500;
+	newQuestGiver->gib_health = -999999; // How much damage to gib (non-applicable bc DAMAGE_NO)
+
+	newQuestGiver->die = questgiver_die;
+
+	// Uses infantry stand and fidget as animations
+	newQuestGiver->monsterinfo.stand = questgiver_stand;
+	newQuestGiver->monsterinfo.idle = questgiver_fidget;
+
+	newQuestGiver->think = questgiver_fidget;
+	newQuestGiver->nextthink = level.time + 0.1;
+
+	// Set rotation 
+	newQuestGiver->yaw_speed = 20;
+	newQuestGiver->s.angles[0] = 0;
+	newQuestGiver->s.angles[1] = spawn_angles_q[1];
+	newQuestGiver->s.angles[2] = 0;
+
+	// Quest information
+	newQuestGiver->questNum = questNum;
+
+	VectorSet(newQuestGiver->mins, -16, -16, -32);
+	VectorSet(newQuestGiver->maxs, 16, 16, 32);
+	VectorClear(newQuestGiver->velocity);
+
+	KillBox(newQuestGiver); // Kill anything in the way of our new NPC when spawning (MUST BE DONE WHEN NOT LINKED)
+
+	gi.linkentity(newQuestGiver); // Link entity to game
+
+}
+
 
 
 

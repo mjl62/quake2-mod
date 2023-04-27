@@ -338,6 +338,10 @@ typedef struct
 	int			body_que;			// dead bodies
 
 	int			power_cubes;		// ugly necessity for coop
+	
+	// Matthew LiDonni (Please fucking work I dont wanna use ugly health icons)
+	int			pic_fatigue;
+	int			pic_magicka;
 } level_locals_t;
 
 
@@ -603,6 +607,7 @@ void Cmd_Help_f (edict_t *ent);
 void Cmd_Score_f (edict_t *ent);
 void Cmd_ShowRPGStat_f(edict_t* ent);
 void Cmd_ShowApplyStats_f(edict_t* ent);
+void Cmd_ShowRPGInventory_f(edict_t* ent);
 
 
 //
@@ -789,6 +794,10 @@ void SetWeaponSkill(edict_t* ent, int skill, float newlevel);
 void grantXP(edict_t* ent, int xp);
 void grantCurrWeapXP(edict_t* ent, float xp);
 int	getSkillReq(edict_t* ent, char* name);
+void AddRPGItem(edict_t* ent, int item);
+void RemoveRPGItem(edict_t* ent, int item);
+void GetRPGInventory(edict_t* ent);
+char* GetRPGItemName(edict_t* ent, int item);
 
 
 //
@@ -861,31 +870,8 @@ void GetChaseTarget(edict_t *ent);
 #define	ANIM_DEATH		5
 #define	ANIM_REVERSE	6
 
-// Matthew LiDonni
-
-#define ITEMTYPE_ARMOR_HEAD		0
-#define ITEMTYPE_ARMOR_CHEST	1
-#define ITEMTYPE_ARMOR_LEGS		2
-#define ITEMTYPE_HEALING_POT	5
-#define ITEMTYPE_FATIGUE_POT	6
-#define ITEMTYPE_MAGICKA_POT	7
-#define ITEMTYPE_FORTIFY_POT	8
-#define ITEMTYPE_LEVITATE_POT	9
-
-#define BONUSSTAT_HEALTH_MAX		0
-#define BONUSSTAT_FATIGUE_REGEN		1
-#define BONUSSTAT_MAGICKA_COST		2
-#define BONUSSTAT_RICOCHET			3
-
-// Custom Items
-typedef struct {
-	int			itemType;  
-	int			armorResistance;
-	int			bonusStatType;
 
 
-
-} mwItem;
 
 // Quests
 typedef struct {
@@ -903,6 +889,8 @@ typedef struct {
 	int			kills;
 	int			killsneeded;
 	int			rewardXP;
+	int			rewardItem;
+	int			rewardQuantity;
 	// reward item;
 } quest;
 
@@ -971,6 +959,10 @@ typedef struct
 	float		skill_destruction; // Fireball and Dire Viper
 	float		skill_restoration; // Healing Word and Fortify
 	float		skill_alteration; // Open Lock
+
+	int			rpgInventory[32];
+
+	int			rpgCursorLocation;
 
 } client_persistant_t;
 

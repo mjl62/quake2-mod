@@ -412,9 +412,12 @@ void Interact(edict_t* ent, vec3_t start, vec3_t aimdir) {
 		}
 		else if (ent->client->pers.questlog[Interact.ent->questNum].questcompleted == false) {
 
-			if (ent->client->pers.questlog[Interact.ent->questNum].kills >= ent->client->pers.questlog[Interact.ent->questNum].killsneeded) // ADD OR FOR AN OBJECTIVE BEING COMPLETE
+			if (ent->client->pers.questlog[Interact.ent->questNum].kills >= ent->client->pers.questlog[Interact.ent->questNum].killsneeded) 
 			{
 				grantXP(ent, ent->client->pers.questlog[Interact.ent->questNum].rewardXP);
+				for (int i = 0; i < ent->client->pers.questlog[Interact.ent->questNum].rewardQuantity; i++) {
+					AddRPGItem(ent, ent->client->pers.questlog[Interact.ent->questNum].rewardItem);
+				}
 				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].completediag);
 				ent->client->pers.questlog[Interact.ent->questNum].questcompleted = true;
 			}
@@ -428,10 +431,30 @@ void Interact(edict_t* ent, vec3_t start, vec3_t aimdir) {
 		else {
 			gi.bprintf(PRINT_CHAT, "Something went wrong with the quest interaction...\n");
 		}
+		return;
 	}
 	if (Interact.fraction != 1.0 && Interact.ent->classname == "questitem") {
 		ent->client->pers.questlog[Interact.ent->questNum].kills += 1;
 		G_FreeEdict(Interact.ent);
+		return;
+	}
+	if (Interact.fraction != 1.0 && Interact.ent->classname == "mailrecipient") {
+		
+		if (ent->client->pers.questlog[2].queststarted == true && ent->client->pers.questlog[2].questcompleted == false) {
+			if (ent->client->pers.questlog[2].kills == 0) {
+				gi.bprintf(PRINT_CHAT, "What's this? Ah, tell 'im I said thanks.\n");
+				ent->client->pers.questlog[2].kills = 1;
+				return;
+			}
+			gi.bprintf(PRINT_CHAT, "That all? Ok... so why are ya still here? I got nothin' for ya.\n");
+		}
+		else if (ent->client->pers.questlog[2].questcompleted == true) {
+			gi.bprintf(PRINT_CHAT, "So how'dya like bein a mailman? Whaddaya mean? You deliver mail, of course ya'are!\n");
+		}
+		else {
+			gi.bprintf(PRINT_CHAT, "Do I know ya? No? Then quit starin'!\n");
+		}
+		return;
 	}
 }
 
@@ -480,7 +503,7 @@ void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int damage, int mod) {
 			gi.cprintf(ent, PRINT_HIGH, "/");
 			itoa(roll, out, 10);
 			gi.cprintf(ent, PRINT_HIGH, out);
-			gi.cprintf(ent, PRINT_HIGH, "     ");
+			gi.cprintf(ent, PRINT_HIGH, "\n");
 		}
 	}
 }
@@ -885,10 +908,7 @@ void weapon_grenadelauncher_fire(edict_t* ent)
 			gi.cprintf(ent, PRINT_HIGH, "/");
 			itoa(roll, out, 10);
 			gi.cprintf(ent, PRINT_HIGH, out);
-			gi.cprintf(ent, PRINT_HIGH, "    ");
-
-
-			
+			gi.cprintf(ent, PRINT_HIGH, "\n");
 		}
 
 		gi.WriteByte(svc_muzzleflash);

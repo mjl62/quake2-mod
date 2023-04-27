@@ -764,6 +764,100 @@ void Cmd_ShowApplyStats_f(edict_t* ent)
 	ShowApplyStats(ent);
 }
 
+// RPG Inventory
+// A helpmenu to show RPG stats
+void ShowRPGInventory(edict_t* ent)
+{
+	char	string[2048]; // was 1024
+	
+	// Matthew LiDonni
+	//GetRPGItemName(ent, ent->client->pers.rpgInventory[0])
+	char rows[16][32] = {""};
+
+	for (int i = 0; i < 16; i++) {
+		if (ent->client->pers.rpgCursorLocation == i) {
+			strcpy(rows[i], ">");
+			strcat(rows[i], GetRPGItemName(ent, ent->client->pers.rpgInventory[i]));
+			strcat(rows[i], "<");
+			continue;
+		}
+		strcpy(rows[i], GetRPGItemName(ent, ent->client->pers.rpgInventory[i]));
+	}
+	
+
+
+	// send the layout
+	Com_sprintf(string, sizeof(string),
+		""
+		"xv 0 yv 12 cstring2 \"%s\" " // Bag
+		"xv 0 yv 24 cstring2 \"%s\" "	// --------
+		"xv 0 yv 36 cstring2 \"%s\" "	// rows[0]
+		"xv 0 yv 48 cstring2 \"%s\" "  // rows[1]
+		"xv 0 yv 60 cstring2 \"%s\" "  // rows[2]
+		"xv 0 yv 72 cstring2 \"%s\" "  // rows[3]
+		"xv 0 yv 84 cstring2 \"%s\" "  // rows[4]
+		"xv 0 yv 96 cstring2 \"%s\" "  // rows[5]
+		"xv 0 yv 108 cstring2 \"%s\" "  // rows[6]
+		"xv 0 yv 120 cstring2 \"%s\" " // rows[7]
+		"xv 0 yv 132 cstring2 \"%s\" " // rows[8]
+		"xv 0 yv 144 cstring2 \"%s\" " // rows[9]
+		"xv 0 yv 156 cstring2 \"%s\" " // rows[10]
+		"xv 0 yv 168 cstring2 \"%s\" " // rows[11]
+		"xv 0 yv 180 cstring2 \"%s\" " // rows[12]
+		"xv 0 yv 192 cstring2 \"%s\" " // rows[13]
+		"xv 0 yv 204 cstring2 \"%s\" " // rows[14]
+		"xv 0 yv 216 cstring2 \"%s\" " // rows[15]
+		,
+		"Bag",
+		"------------------",
+		rows[0],
+		rows[1],
+		rows[2],
+		rows[3],
+		rows[4],
+		rows[5],
+		rows[6],
+		rows[7],
+		rows[8],
+		rows[9],
+		rows[10],
+		rows[11],
+		rows[12],
+		rows[13],
+		rows[14],
+		rows[15]
+	);
+
+	gi.WriteByte(svc_layout);
+	gi.WriteString(string);
+	gi.unicast(ent, true);
+}
+
+void Cmd_ShowRPGInventory_f(edict_t* ent)
+{
+	// this is for backwards compatability
+	if (deathmatch->value)
+	{
+		Cmd_Score_f(ent);
+		return;
+	}
+
+	ent->client->showinventory = false;
+	ent->client->showscores = false;
+
+	if (ent->client->showhelp && (ent->client->pers.game_helpchanged == game.helpchanged))
+	{
+		ent->client->showhelp = false;
+		return;
+	}
+
+	ent->client->showhelp = true;
+	ent->client->pers.helpchanged = 0;
+	ent->client->showapplystat = false;
+
+	ShowRPGInventory(ent);
+}
+
 
 //=======================================================================
 
@@ -787,7 +881,19 @@ void G_SetStats (edict_t *ent)
 	//
 	// ammo
 	//
-	if (!ent->client->ammo_index /* || !ent->client->pers.inventory[ent->client->ammo_index] */)
+	/* || !ent->client->pers.inventory[ent->client->ammo_index]  This was in THERE V after ent->client->ammo_index but before the ) for some reason...*/
+	
+	// fatigue (No more ammo get fucked, idiots)
+	item = &itemlist[ent->client->ammo_index];
+	ent->client->ps.stats[STAT_AMMO_ICON] = level.pic_magicka;
+	ent->client->ps.stats[STAT_AMMO] = ent->client->pers.magicka;
+	
+
+	// magicka (No armor pickup display)
+	ent->client->ps.stats[STAT_ARMOR_ICON] = level.pic_fatigue;
+	ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.fatigue;
+	/*
+	if (!ent->client->ammo_index )
 	{
 		ent->client->ps.stats[STAT_AMMO_ICON] = 0;
 		ent->client->ps.stats[STAT_AMMO] = 0;
@@ -798,10 +904,12 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_AMMO_ICON] = gi.imageindex (item->icon);
 		ent->client->ps.stats[STAT_AMMO] = ent->client->pers.inventory[ent->client->ammo_index];
 	}
+	*/
 	
 	//
 	// armor
 	//
+	/*
 	power_armor_type = PowerArmorType (ent);
 	if (power_armor_type)
 	{
@@ -813,7 +921,7 @@ void G_SetStats (edict_t *ent)
 			power_armor_type = 0;;
 		}
 	}
-
+	
 	index = ArmorIndex (ent);
 	if (power_armor_type && (!index || (level.framenum & 8) ) )
 	{	// flash between power armor and other armor icon
@@ -831,6 +939,8 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_ARMOR_ICON] = 0;
 		ent->client->ps.stats[STAT_ARMOR] = 0;
 	}
+
+	*/
 
 	//
 	// pickup message

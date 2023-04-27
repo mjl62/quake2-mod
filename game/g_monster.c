@@ -467,24 +467,53 @@ void inflictStatus(edict_t* target, edict_t* inflictor, int type, int ticks, int
 }
 
 void tickStatusEffects(edict_t* self) {
-	if (self->healRestTicks > 0) {
-		if (level.time > self->nextStatusTickTime) {
+
+	if (level.time > self->nextStatusTickTime) {
+		// Heal
+		if (self->healRestTicks > 0) {
 			self->healRestTicks -= 1;
 			self->health += self->healRestStrength;
-			if (self->health + self->healRestStrength > self->max_health) {
+			if (self->health > self->max_health) {
 				self->health = self->max_health;
 			}
-			self->nextStatusTickTime = level.time + 1;
 		}
-	}
+		// Normal fatigue regen
+		if (Q_stricmp(self->classname, "player") == 0) {
+			self->client->pers.fatigue += (2 + (0.25 * GetLevelOf(self, SKILL_ENDURANCE)));
+			if (self->client->pers.fatigue > self->client->pers.max_fatigue) {
+				self->client->pers.fatigue = self->client->pers.max_fatigue;
+			}
+		}
 
-	if (self->poisonTicks > 0) {
-		if (level.time > self->nextStatusTickTime) {
+		// Fatigue
+		if (self->fatigueRestTicks > 0) {
+			self->fatigueRestTicks -= 1;
+			self->client->pers.fatigue += self->fatigueRestStrength;
+			if (self->client->pers.fatigue > self->client->pers.max_fatigue) {
+				self->client->pers.fatigue = self->client->pers.max_fatigue;
+			}
+		}
+
+		// Magicka
+		if (self->magickaRestTicks > 0) {
+			self->magickaRestTicks -= 1;
+			self->client->pers.magicka += self->magickaRestStrength;
+			if (self->client->pers.magicka > self->client->pers.max_magicka) {
+				self->client->pers.magicka = self->client->pers.max_magicka;
+			}
+		}
+
+		// Poison
+		if (self->poisonTicks > 0) {
 			self->poisonTicks -= 1;
 			T_Damage(self, self->poisonInflictor, self->poisonInflictor, vec3_origin, vec3_origin, vec3_origin, self->poisonStrength, 1, 732, MOD_HYPERBLASTER);
-			self->nextStatusTickTime = level.time + 1;		
 		}
+
+		self->nextStatusTickTime = level.time + 1;
 	}
+
+
+	
 	
 }
 

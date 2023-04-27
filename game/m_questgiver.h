@@ -2,6 +2,7 @@
 
 void SP_QuestGiver(edict_t *ent, vec3_t spawn_origin_q, vec3_t spawn_angles_q, int questNum);
 void SP_QuestItem_ring(edict_t* ent, vec3_t spawn_origin_q, vec3_t spawn_angles_q, int questNum);
+void SP_MailRecipient(edict_t* ent, vec3_t spawn_origin_q, vec3_t spawn_angles_q, int questNum);
 
 void QuestGiver_RunFrames(edict_t* self, int start, int end);
 

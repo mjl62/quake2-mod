@@ -920,9 +920,15 @@ void Cmd_SpawnQuests_f(edict_t* ent) {
 		vec3_t o2 = { 153, -200, 46 };
 		vec3_t a2 = { 0, 178, 0 };
 		SP_QuestGiver(ent, o2, a2, 1);
-		vec3_t o3 = { 425, -72, -197 };
+		vec3_t o3 = { 1094, 355, -9 };
 		vec3_t a3 = { 0, 178, 0 };
-		SP_QuestItem_ring(ent, o3, a3, 1);
+		SP_QuestGiver(ent, o3, a3, 2);
+		vec3_t o4 = { 425, -72, -197 };
+		vec3_t a4 = { 0, 178, 0 };
+		SP_QuestItem_ring(ent, o4, a4, 1);
+		vec3_t o5 = { -76, 1439, -81 };
+		vec3_t a5 = { 0, -94, 0 };
+		SP_MailRecipient(ent, o5, a5, 2);
 	}
 
 }
@@ -974,6 +980,32 @@ void Cmd_RPGSetStat_f(edict_t* ent, char* target, int desiredlevel) {
 	gi.cprintf(ent, PRINT_HIGH, desiredlevel);
 	*/
 	
+}
+
+void Cmd_GiveRPGItem_f(edict_t* ent, int item) {
+	AddRPGItem(ent, item);
+}
+
+void Cmd_RemoveRPGItem_f(edict_t* ent, int item) {
+	RemoveRPGItem(ent, item);
+}
+
+void Cmd_CheckInventory_f(edict_t* ent) {
+	GetRPGInventory(ent);
+}
+
+void Cmd_RPGShiftCursor_f(edict_t* ent, int shift) {
+	if (ent->client->pers.rpgCursorLocation == 15 && shift > 0) {
+		ent->client->pers.rpgCursorLocation = 0;
+	}
+	else if (ent->client->pers.rpgCursorLocation == 0 && shift < 0) {
+		ent->client->pers.rpgCursorLocation = 15;
+	}
+	else {
+		ent->client->pers.rpgCursorLocation += shift;
+	}
+	Cmd_ShowRPGInventory_f(ent);
+	Cmd_ShowRPGInventory_f(ent);
 }
 
 void Cmd_RPGSetSkill_f(edict_t* ent, char* target, int desiredlevel) {
@@ -1047,6 +1079,11 @@ void Cmd_ApplyStatPoint_f(edict_t* ent, char* statname) {
 		Cmd_ShowApplyStats_f(ent);
 		Cmd_ShowApplyStats_f(ent);
 	}
+}
+
+
+void Cmd_RPGInventoryScreen_f(edict_t* ent) {
+	Cmd_ShowRPGInventory_f(ent);
 }
 
 
@@ -1152,14 +1189,29 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp(cmd, "rpgpoints") == 0) {
 		Cmd_ShowApplyStats_f(ent);
 	}
+	else if (Q_stricmp(cmd, "rpginventory") == 0) {
+		Cmd_RPGInventoryScreen_f(ent);
+	}
 	else if (Q_stricmp(cmd, "rpgheal") == 0) {
 		Cmd_HealRPG_f(ent);
 	}
 	else if (Q_stricmp(cmd, "rpgsetstat") == 0) {
 		Cmd_RPGSetStat_f(ent, gi.argv(1), atoi(gi.argv(2)));
 	}
+	else if (Q_stricmp(cmd, "rpggive") == 0) {
+		Cmd_GiveRPGItem_f(ent, atoi(gi.argv(1)));
+	}
+	else if (Q_stricmp(cmd, "rpgremove") == 0) {
+		Cmd_RemoveRPGItem_f(ent, atoi(gi.argv(1)));
+	}
+	else if (Q_stricmp(cmd, "rpgcheckinv") == 0) {
+		Cmd_CheckInventory_f(ent);
+	}
 	else if (Q_stricmp(cmd, "rpgsetskill") == 0) {
 		Cmd_RPGSetSkill_f(ent, gi.argv(1), atoi(gi.argv(2)));
+	}
+	else if (Q_stricmp(cmd, "rpgcursor") == 0) {
+		Cmd_RPGShiftCursor_f(ent, atoi(gi.argv(1)));
 	}
 	else if (Q_stricmp(cmd, "setmagicka") == 0) {
 		Cmd_SetMagicka_f(ent, atoi(gi.argv(1)));

@@ -662,7 +662,9 @@ void InitClientPersistant (gclient_t *client)
 	client->pers.skill_alteration = 5;
 
 	client->showapplystat = false;
+	
 
+	client->pers.rpgCursorLocation = 0;
 
 }
 
@@ -838,6 +840,73 @@ void SetWeaponSkill(edict_t* ent, int skill, float newlevel) {
 	}
 }
 
+
+// RPG Inventory
+
+void AddRPGItem(edict_t* ent, int item) {
+	qboolean foundslot = false;
+	for (int i = 0; i < 16; i++) {
+		if (ent->client->pers.rpgInventory[i] == NULL) {
+			ent->client->pers.rpgInventory[i] = item;
+			foundslot = true;
+			break;
+		}
+	}
+	if (!foundslot) {
+		gi.centerprintf(ent, "Your bag is full!\n");
+	}
+	
+}
+
+void RemoveRPGItem(edict_t* ent, int item) {
+	qboolean founditem = false;
+	for (int i = 0; i < 16; i++) {
+		if (ent->client->pers.rpgInventory[i] == item) {
+			ent->client->pers.rpgInventory[i] = NULL;
+			founditem = true;
+			break;
+		}
+	}
+	if (!founditem) {
+		gi.centerprintf(ent, "Item not found in bag\n");
+	}
+}
+
+void GetRPGInventory(edict_t* ent) {
+	gi.bprintf(PRINT_HIGH, "Inventory:\n");
+
+	for (int i = 0; i < 16; i++) {
+		if (ent->client->pers.rpgInventory[i] != NULL) {
+			gi.bprintf(PRINT_HIGH, "Item ");
+		}
+		else {
+			gi.bprintf(PRINT_HIGH, "NULL ");
+		}
+	}
+}
+
+char* GetRPGItemName(edict_t* ent, int item) {
+	if (item == NULL) {
+		return "";
+	}
+	if (item == RPGITEM_HEALTHPOT) {
+		return "Health Potion";
+	}
+	if (item == RPGITEM_MAGICKAPOT) {
+		return "Magicka Potion";
+	}
+	if (item == RPGITEM_FATIGUEPOT) {
+		return "Fatigue Potion";
+	}
+	if (item == RPGITEM_LEVITATEPOT) {
+		return "Levitation Potion";
+	}
+	if (item == RPGITEM_FORTIFYPOT) {
+		return "Resistance Potion";
+	}
+	return "ERR";
+
+}
 /*
 =======================================================================
 
@@ -1510,6 +1579,8 @@ void ClientBegin (edict_t *ent)
 	// Matthew LiDonni (Init quest shit for level)
 	gi.AddCommandString("questgiver");
 
+	ent->nextStatusTickTime = 0;
+
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
 }
@@ -1907,7 +1978,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			UpdateChaseCam(other);
 	}
 
-	ent->nextStatusTickTime
+	tickStatusEffects(ent);
+	
+
 }
 
 

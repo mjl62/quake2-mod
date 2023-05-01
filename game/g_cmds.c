@@ -1004,6 +1004,16 @@ void Cmd_RPGShiftCursor_f(edict_t* ent, int shift) {
 	else {
 		ent->client->pers.rpgCursorLocation += shift;
 	}
+
+	// Refresh inventory screen
+	Cmd_ShowRPGInventory_f(ent);
+	Cmd_ShowRPGInventory_f(ent);
+}
+
+void Cmd_RPGUserCursor_f(edict_t* ent) {
+	UseRPGItem(ent, ent->client->pers.rpgInventory[ent->client->pers.rpgCursorLocation]);
+	
+	// Refresh inventory screen
 	Cmd_ShowRPGInventory_f(ent);
 	Cmd_ShowRPGInventory_f(ent);
 }
@@ -1212,6 +1222,9 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp(cmd, "rpgcursor") == 0) {
 		Cmd_RPGShiftCursor_f(ent, atoi(gi.argv(1)));
+	}
+	else if (Q_stricmp(cmd, "rpgusecursor") == 0) {
+		Cmd_RPGUserCursor_f(ent);
 	}
 	else if (Q_stricmp(cmd, "setmagicka") == 0) {
 		Cmd_SetMagicka_f(ent, atoi(gi.argv(1)));

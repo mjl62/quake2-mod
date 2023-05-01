@@ -431,7 +431,7 @@ void initStatus(edict_t* self) {
 	self->fortResStrength = 0;
 	self->fortResTicks = 0;
 
-	self->leviatateTicks = 0;
+	self->levitateTicks = 0;
 }
 
 
@@ -460,7 +460,7 @@ void inflictStatus(edict_t* target, edict_t* inflictor, int type, int ticks, int
 		target->fortResStrength = strength;
 	}
 	else if (type == STATUS_LEVITATE) {
-		target->leviatateTicks += ticks;
+		target->levitateTicks += ticks;
 	}
 	
 
@@ -507,6 +507,15 @@ void tickStatusEffects(edict_t* self) {
 		if (self->poisonTicks > 0) {
 			self->poisonTicks -= 1;
 			T_Damage(self, self->poisonInflictor, self->poisonInflictor, vec3_origin, vec3_origin, vec3_origin, self->poisonStrength, 1, 732, MOD_HYPERBLASTER);
+		}
+
+
+		if (self->levitateTicks > 0) {
+			self->levitateTicks -= 1;
+			self->movetype = MOVETYPE_NOCLIP;
+			if (self->levitateTicks < 1) {
+				self->movetype = MOVETYPE_WALK;
+			}
 		}
 
 		self->nextStatusTickTime = level.time + 1;

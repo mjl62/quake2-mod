@@ -1235,7 +1235,7 @@ struct edict_s
 	int			fortResStrength;
 	int			fortResTicks;
 
-	int			leviatateTicks;
+	int			levitateTicks;
 
 	int			nextStatusTickTime;
 

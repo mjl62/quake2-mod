@@ -522,7 +522,8 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		}
 		// Poison (732 is the code meaning its a poison tick doing damage, so we dont want to inflict poison again)
 		if (mod == MOD_HYPERBLASTER && dflags != 732) {
-			inflictStatus(targ, attacker, STATUS_POISON, 6, 4);
+			int damageMod = GetLevelOf(inflictor, SKILL_INTELLIGENCE)/2; // For every 2 levels poison does 1 more damage
+			inflictStatus(targ, attacker, STATUS_POISON, 6, 4 + damageMod);
 		}
 	}
 

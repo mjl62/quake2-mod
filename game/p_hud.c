@@ -885,13 +885,13 @@ void G_SetStats (edict_t *ent)
 	
 	// fatigue (No more ammo get fucked, idiots)
 	item = &itemlist[ent->client->ammo_index];
-	ent->client->ps.stats[STAT_AMMO_ICON] = level.pic_magicka;
-	ent->client->ps.stats[STAT_AMMO] = ent->client->pers.magicka;
+	ent->client->ps.stats[STAT_AMMO_ICON] = level.pic_fatigue;
+	ent->client->ps.stats[STAT_AMMO] = ent->client->pers.fatigue;
 	
 
 	// magicka (No armor pickup display)
-	ent->client->ps.stats[STAT_ARMOR_ICON] = level.pic_fatigue;
-	ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.fatigue;
+	ent->client->ps.stats[STAT_ARMOR_ICON] = level.pic_magicka;
+	ent->client->ps.stats[STAT_ARMOR] = ent->client->pers.magicka;
 	/*
 	if (!ent->client->ammo_index )
 	{

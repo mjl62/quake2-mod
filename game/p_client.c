@@ -904,9 +904,66 @@ char* GetRPGItemName(edict_t* ent, int item) {
 	if (item == RPGITEM_FORTIFYPOT) {
 		return "Resistance Potion";
 	}
+	if (item == RPGITEM_CHESTARMOR) {
+		return "Iron Chestplate";
+	}
+	if (item == RPGITEM_HEADARMOR) {
+		return "Iron Helmet";
+	}
+	if (item == RPGITEM_LEGARMOR) {
+		return "Leather Boots";
+	}
 	return "ERR";
-
 }
+
+
+void UseRPGItem(edict_t* ent, int item) {
+	if (item == NULL) {
+		return;
+	}
+	else if (item == RPGITEM_HEALTHPOT) {
+		gi.bprintf(PRINT_HIGH, "Used Health Potion\n");
+		inflictStatus(ent, ent, STATUS_RESTORE_HEALTH, 8, 10);
+	}
+	else if (item == RPGITEM_MAGICKAPOT) {
+		gi.bprintf(PRINT_HIGH, "Used Magicka Potion\n");
+		inflictStatus(ent, ent, STATUS_RESTORE_MAGICKA, 8, 10);
+	}
+	else if (item == RPGITEM_FATIGUEPOT) {
+		gi.bprintf(PRINT_HIGH, "Used Fatigue Potion\n");
+		inflictStatus(ent, ent, STATUS_RESTORE_FATIGUE, 8, 10);
+	}
+	else if (item == RPGITEM_LEVITATEPOT) {
+		gi.bprintf(PRINT_HIGH, "Used Levitation Potion\n");
+		inflictStatus(ent, ent, STATUS_LEVITATE, 20, 1);
+	}
+	else if (item == RPGITEM_FORTIFYPOT) {
+		gi.bprintf(PRINT_HIGH, "Used Fortify Potion\n");
+		inflictStatus(ent, ent, STATUS_FORTIFY_RESISTANCE, 20, 1);
+	}
+	else if (item == RPGITEM_CHESTARMOR) {
+		gi.bprintf(PRINT_HIGH, "Equipped Chestplate !TODO!\n");
+		// Do we want to remove armor from inv when equipped?
+		return;
+	}
+	else if (item == RPGITEM_HEADARMOR) {
+		gi.bprintf(PRINT_HIGH, "Equipped Helmet !TODO!\n");
+		// Do we want to remove armor from inv when equipped?
+		return;
+	}
+	else if (item == RPGITEM_LEGARMOR) {
+		gi.bprintf(PRINT_HIGH, "Equipped Boots !TODO!\n");
+		// Do we want to remove armor from inv when equipped?
+		return;
+	}
+	else {
+		gi.bprintf(PRINT_HIGH, "UNKNOWN ITEM, NOTHING WAS USED\n");
+		return;
+	}
+	RemoveRPGItem(ent, item);
+	
+}
+
 /*
 =======================================================================
 
@@ -1844,7 +1901,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			client->ps.pmove.pm_type = PM_DEAD;
 		else
 			client->ps.pmove.pm_type = PM_NORMAL;
-
+		
 		client->ps.pmove.gravity = sv_gravity->value;
 		pm.s = client->ps.pmove;
 
@@ -1853,6 +1910,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			pm.s.origin[i] = ent->s.origin[i]*8;
 			pm.s.velocity[i] = ent->velocity[i]*8;
 		}
+
 
 		if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
 		{
@@ -1914,7 +1972,8 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		if (ent->movetype != MOVETYPE_NOCLIP)
 			G_TouchTriggers (ent);
-
+		
+		
 		// touch other objects
 		for (i=0 ; i<pm.numtouch ; i++)
 		{

@@ -506,6 +506,12 @@ void Melee(edict_t* ent, vec3_t start, vec3_t aimdir, int damage, int mod) {
 			gi.cprintf(ent, PRINT_HIGH, "\n");
 		}
 	}
+	if (ent->client->pers.fatigue >= 5) {
+		ent->client->pers.fatigue -= 5;
+	}
+	else {
+		ent->client->pers.fatigue = 0;
+	}
 }
 
 

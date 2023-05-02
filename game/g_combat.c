@@ -186,6 +186,7 @@ static int CheckPowerArmor (edict_t *ent, vec3_t point, vec3_t normal, int damag
 
 	if (dflags & DAMAGE_NO_ARMOR)
 		return 0;
+	
 
 	if (client)
 	{
@@ -490,12 +491,47 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 		int healthBefore = targ->health;
 		// End
 
+
 		if ((targ->svflags & SVF_MONSTER) || (client))
 			SpawnDamage (TE_BLOOD, point, normal, take);
 		else
 			SpawnDamage (te_sparks, point, normal, take);
 
+		if (strcmp(targ->classname, "player") == 0) {
+			float resistance = 0;
+			resistance += client->pers.rpgArmorValues[0] / 100.0;
+			resistance += client->pers.rpgArmorValues[1] / 100.0;
+			resistance += client->pers.rpgArmorValues[2] / 100.0;
 
+			char* res[4];
+			itoa(resistance, res, 10);
+
+			gi.bprintf(PRINT_HIGH, res);
+
+			gi.bprintf(PRINT_HIGH, " resistance gives: ");
+			itoa(take, res, 10);
+
+			gi.bprintf(PRINT_HIGH, res);
+			gi.bprintf(PRINT_HIGH, " -> ");
+			take = take - (take * resistance);
+
+			itoa(take, res, 10);
+
+			gi.bprintf(PRINT_HIGH, res);
+
+			gi.bprintf(PRINT_HIGH, "\n");
+			if (take == 0) {
+				int coinflip;
+				coinflip = (crandom() * 100.0);
+				if (coinflip > resistance * 100) {
+					take = 0;
+				}
+				else {
+					take = 1;
+				}
+			}
+		}
+		
 		targ->health = targ->health - take;
 			
 
@@ -520,11 +556,13 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			}
 			return;
 		}
+		/*
 		// Poison (732 is the code meaning its a poison tick doing damage, so we dont want to inflict poison again)
 		if (mod == MOD_HYPERBLASTER && dflags != 732) {
 			int damageMod = GetLevelOf(inflictor, SKILL_INTELLIGENCE)/2; // For every 2 levels poison does 1 more damage
 			inflictStatus(targ, attacker, STATUS_POISON, 6, 4 + damageMod);
 		}
+		*/
 	}
 
 	if (targ->svflags & SVF_MONSTER)

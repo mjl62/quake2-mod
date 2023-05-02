@@ -1056,6 +1056,29 @@ void Cmd_SetFatigue_f(edict_t* ent, int amount) {
 	ent->client->pers.fatigue = amount;
 }
 
+void Cmd_PrintArmor_f(edict_t* ent) {
+	
+	if (ent->client->pers.rpgArmorValues[0] == 0) {
+		gi.bprintf(PRINT_HIGH, "No helmet. ");
+	}
+	else {
+		gi.bprintf(PRINT_HIGH, "Helmet equipped. ");
+	}
+
+	if (ent->client->pers.rpgArmorValues[1] == 0) {
+		gi.bprintf(PRINT_HIGH, "No chest. ");
+	}
+	else {
+		gi.bprintf(PRINT_HIGH, "Chest equipped. ");
+	}
+	if (ent->client->pers.rpgArmorValues[2] == 0) {
+		gi.bprintf(PRINT_HIGH, "No legs. ");
+	}
+	else {
+		gi.bprintf(PRINT_HIGH, "Legs equipped. ");
+	}
+}
+
 void Cmd_ApplyStatPoint_f(edict_t* ent, char* statname) {
 	if (ent->client->pers.statpoints > 0) {
 		if (Q_stricmp(statname, "strength") == 0) {
@@ -1231,6 +1254,9 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp(cmd, "setfatigue") == 0) {
 		Cmd_SetFatigue_f(ent, atoi(gi.argv(1)));
+	}
+	else if (Q_stricmp(cmd, "checkarmor") == 0) {
+		Cmd_PrintArmor_f(ent);
 	}
 	else if (Q_stricmp(cmd, "applypoints") == 0) {
 		Cmd_ApplyStatPoint_f(ent, gi.argv(1));

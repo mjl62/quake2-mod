@@ -325,6 +325,7 @@ void blaster_touch (edict_t *self, edict_t *other, cplane_t *plane, csurface_t *
 			mod = MOD_HYPERBLASTER;
 		else
 			mod = MOD_BLASTER;
+
 		T_Damage (other, self, self->owner, self->velocity, self->s.origin, plane->normal, self->dmg, 2, DAMAGE_ENERGY, mod);
 	}
 	else

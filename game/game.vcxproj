@@ -85,7 +85,7 @@
     <IntDir>.\release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <TargetName>gamex86</TargetName>
-    <OutDir>D:\Steam\steamapps\common\Quake 2\mod</OutDir>
+    <OutDir>..\..\..\..\..\Program Files %28x86%29\Steam\steamapps\common\Quake 2\mod</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Alpha|Win32'">
     <OutDir>.\..\ReleaseAXP\</OutDir>

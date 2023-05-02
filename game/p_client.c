@@ -647,6 +647,14 @@ void InitClientPersistant (gclient_t *client)
 
 	client->pers.statpoints = 8;
 
+	client->pers.rpgArmorValues[0] = 0;
+	client->pers.rpgArmorValues[1] = 0;
+	client->pers.rpgArmorValues[2] = 0;
+
+	client->pers.bonusStats[0] = BONUSSTAT_NONE;
+	client->pers.bonusStats[1] = BONUSSTAT_NONE;
+	client->pers.bonusStats[2] = BONUSSTAT_NONE;
+
 	// Stats will default to level 1
 	client->pers.stat_strength = 1.0;
 	client->pers.stat_intelligence = 1.0;
@@ -885,6 +893,20 @@ void GetRPGInventory(edict_t* ent) {
 	}
 }
 
+void EquipArmor(edict_t* ent, int slot, int rating, int bonus) {
+	if (ent->client->pers.rpgArmorValues[slot] == 0) {
+		ent->client->pers.rpgArmorValues[slot] = rating;
+		ent->client->pers.bonusStats[slot] = bonus;
+		gi.bprintf(PRINT_HIGH, "\nEquipped\n");
+		return;
+	}
+	ent->client->pers.rpgArmorValues[slot] = 0;
+	ent->client->pers.bonusStats[slot] = BONUSSTAT_NONE;
+
+	gi.bprintf(PRINT_HIGH, "\nUnequipped\n");
+}
+
+
 char* GetRPGItemName(edict_t* ent, int item) {
 	if (item == NULL) {
 		return "";
@@ -941,19 +963,16 @@ void UseRPGItem(edict_t* ent, int item) {
 		gi.bprintf(PRINT_HIGH, "Used Fortify Potion\n");
 		inflictStatus(ent, ent, STATUS_FORTIFY_RESISTANCE, 20, 1);
 	}
-	else if (item == RPGITEM_CHESTARMOR) {
-		gi.bprintf(PRINT_HIGH, "Equipped Chestplate !TODO!\n");
-		// Do we want to remove armor from inv when equipped?
+	else if (item == RPGITEM_HEADARMOR) {
+		EquipArmor(ent, 0, 5, BONUSSTAT_MAGICKA_COST);
 		return;
 	}
-	else if (item == RPGITEM_HEADARMOR) {
-		gi.bprintf(PRINT_HIGH, "Equipped Helmet !TODO!\n");
-		// Do we want to remove armor from inv when equipped?
+	else if (item == RPGITEM_CHESTARMOR) {
+		EquipArmor(ent, 1, 10, BONUSSTAT_FATIGUE_REGEN);
 		return;
 	}
 	else if (item == RPGITEM_LEGARMOR) {
-		gi.bprintf(PRINT_HIGH, "Equipped Boots !TODO!\n");
-		// Do we want to remove armor from inv when equipped?
+		EquipArmor(ent, 2, 5, BONUSSTAT_SPEEDUP);
 		return;
 	}
 	else {
@@ -1918,7 +1937,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	//		gi.dprintf ("pmove changed!\n");
 		}
 
-		pm.cmd = *ucmd;
+		pm.cmd = *ucmd;		
 
 		pm.trace = PM_trace;	// adds default parms
 		pm.pointcontents = gi.pointcontents;
@@ -2038,7 +2057,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	tickStatusEffects(ent);
-	
+
 
 }
 
@@ -2105,6 +2124,13 @@ void ClientBeginServerFrame (edict_t *ent)
 
 // Returns boolean and if true, charges mana cost
 qboolean canCastSpell(edict_t* ent, int magickacost) {
+	if (ent->client->pers.bonusStats[0] == BONUSSTAT_MAGICKA_COST || ent->client->pers.bonusStats[1] == BONUSSTAT_MAGICKA_COST || ent->client->pers.bonusStats[2] == BONUSSTAT_MAGICKA_COST) {
+		magickacost /= 2;
+		if (magickacost == 0) {
+			magickacost = 1;
+		}
+	}
+
 	if (ent->client->pers.magicka >= magickacost) {
 		ent->client->pers.magicka -= magickacost;
 		return true;

@@ -480,6 +480,11 @@ void tickStatusEffects(edict_t* self) {
 		// Normal fatigue regen
 		if (Q_stricmp(self->classname, "player") == 0) {
 			self->client->pers.fatigue += (2 + (0.25 * GetLevelOf(self, SKILL_ENDURANCE)));
+
+			// Having Fatigue Regen on an armor piece gives 5 more regen.
+			if (self->client->pers.bonusStats[0] == BONUSSTAT_FATIGUE_REGEN || self->client->pers.bonusStats[1] == BONUSSTAT_FATIGUE_REGEN || self->client->pers.bonusStats[2] == BONUSSTAT_FATIGUE_REGEN) {
+				self->client->pers.fatigue += 5;
+			}
 			if (self->client->pers.fatigue > self->client->pers.max_fatigue) {
 				self->client->pers.fatigue = self->client->pers.max_fatigue;
 			}

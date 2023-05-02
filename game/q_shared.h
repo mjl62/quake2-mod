@@ -1038,10 +1038,10 @@ typedef enum
 #define RPGITEM_LEGARMOR		8
 
 // Armor stats?
-#define BONUSSTAT_HEALTH_MAX		0
-#define BONUSSTAT_FATIGUE_REGEN		1
-#define BONUSSTAT_MAGICKA_COST		2
-#define BONUSSTAT_RICOCHET			3
+#define BONUSSTAT_NONE				0
+#define BONUSSTAT_SPEEDUP			1
+#define BONUSSTAT_FATIGUE_REGEN		2
+#define BONUSSTAT_MAGICKA_COST		3
 
 
 // dmflags->value flags

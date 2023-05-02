@@ -798,6 +798,7 @@ void AddRPGItem(edict_t* ent, int item);
 void RemoveRPGItem(edict_t* ent, int item);
 void GetRPGInventory(edict_t* ent);
 char* GetRPGItemName(edict_t* ent, int item);
+void EquipArmor(edict_t* ent, int slot, int rating, int bonus);
 
 
 //
@@ -961,6 +962,10 @@ typedef struct
 	float		skill_alteration; // Open Lock
 
 	int			rpgInventory[32];
+
+	// 0 is Head, 1 is Chest, 2 is Legs
+	int			rpgArmorValues[3];
+	int			bonusStats[3];
 
 	int			rpgCursorLocation;
 

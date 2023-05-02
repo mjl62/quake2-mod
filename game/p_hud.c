@@ -781,6 +781,7 @@ void ShowRPGInventory(edict_t* ent)
 			strcat(rows[i], "<");
 			continue;
 		}
+
 		strcpy(rows[i], GetRPGItemName(ent, ent->client->pers.rpgInventory[i]));
 	}
 	

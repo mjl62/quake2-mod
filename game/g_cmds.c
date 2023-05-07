@@ -1122,6 +1122,12 @@ void Cmd_ApplyStatPoint_f(edict_t* ent, char* statname) {
 	}
 }
 
+void Cmd_RPGSprint_f(edict_t* ent) {
+	if (ent->client->pers.fatigue >= 0) {
+		ent->client->pers.fatigue -= 1;
+	}
+}
+
 
 void Cmd_RPGInventoryScreen_f(edict_t* ent) {
 	Cmd_ShowRPGInventory_f(ent);
@@ -1268,6 +1274,9 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp(cmd, "applypoints") == 0) {
 		Cmd_ApplyStatPoint_f(ent, gi.argv(1));
+	}
+	else if (Q_stricmp(cmd, "rpgsprint") == 0) {
+		Cmd_RPGSprint_f(ent);
 	}
 	// End Custom Commands
 	else	// anything that doesn't match a command will be a chat

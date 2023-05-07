@@ -974,6 +974,8 @@ typedef struct
 
 	int			rpgCursorLocation;
 
+	qboolean	isSprinting;
+
 } client_persistant_t;
 
 // client data that stays across deathmatch respawns

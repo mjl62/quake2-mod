@@ -1908,7 +1908,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->resp.cmd_angles[2] = SHORT2ANGLE(ucmd->angles[2]);
 
 	} else {
-
 		// set up for pmove
 		memset (&pm, 0, sizeof(pm));
 
@@ -1924,12 +1923,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		client->ps.pmove.gravity = sv_gravity->value;
 		pm.s = client->ps.pmove;
 
-		for (i=0 ; i<3 ; i++)
+		for (i = 0; i < 3; i++)
 		{
-			pm.s.origin[i] = ent->s.origin[i]*8;
-			pm.s.velocity[i] = ent->velocity[i]*8;
+			pm.s.origin[i] = ent->s.origin[i] * 8;
+			pm.s.velocity[i] = ent->velocity[i] * 8;
 		}
-
+		
 
 		if (memcmp(&client->old_pmove, &pm.s, sizeof(pm.s)))
 		{
@@ -2056,6 +2055,24 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 			UpdateChaseCam(other);
 	}
 
+	if (ent->client->pers.bonusStats[0] == BONUSSTAT_SPEEDUP || ent->client->pers.bonusStats[1] == BONUSSTAT_SPEEDUP || ent->client->pers.bonusStats[2] == BONUSSTAT_SPEEDUP) {
+		gi.cvar_forceset("sv_maxspeed", "700");
+		gi.cvar_forceset("cl_forwardspeed", "400");
+		gi.cvar_forceset("cl_backspeed", "400");
+		gi.cvar_forceset("cl_sidespeed", "400");
+		gi.cvar_forceset("cl_rollspeed", "400");
+	}
+	else {
+		gi.cvar_forceset("sv_maxspeed", "320");
+		gi.cvar_forceset("cl_forwardspeed", "200");
+		gi.cvar_forceset("cl_backspeed", "200");
+		gi.cvar_forceset("cl_sidespeed", "200");
+		gi.cvar_forceset("cl_rollspeed", "200");
+	}
+
+	
+
+	
 	tickStatusEffects(ent);
 }
 

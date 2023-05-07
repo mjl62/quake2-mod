@@ -774,15 +774,49 @@ void ShowRPGInventory(edict_t* ent)
 	//GetRPGItemName(ent, ent->client->pers.rpgInventory[0])
 	char rows[16][32] = {""};
 
+	char* equipTag = " (Equipped)";
+
 	for (int i = 0; i < 16; i++) {
 		if (ent->client->pers.rpgCursorLocation == i) {
 			strcpy(rows[i], ">");
 			strcat(rows[i], GetRPGItemName(ent, ent->client->pers.rpgInventory[i]));
+			
+			// THIS IS THE LEAST EFFICIENT WAY TO DO THIS BUT I DONT WANT TO DIG THROUGH THE CODE AND CHANGE ALL THE ARMOR VALUES TO MAKE THIS WORK
+			if (ent->client->pers.rpgArmorValues[0] > 0) {
+				if (ent->client->pers.rpgInventory[i] == 7) {
+					strcat(rows[i], equipTag);
+				}
+			}
+			if (ent->client->pers.rpgArmorValues[1] > 0) {
+				if (ent->client->pers.rpgInventory[i] == 6) {
+					strcat(rows[i], equipTag);
+				}
+			}
+			if (ent->client->pers.rpgArmorValues[2] > 0) {
+				if (ent->client->pers.rpgInventory[i] == 8) {
+					strcat(rows[i], equipTag);
+				}
+			}
 			strcat(rows[i], "<");
 			continue;
 		}
-
 		strcpy(rows[i], GetRPGItemName(ent, ent->client->pers.rpgInventory[i]));
+		// THIS IS THE LEAST EFFICIENT WAY TO DO THIS BUT I DONT WANT TO DIG THROUGH THE CODE AND CHANGE ALL THE ARMOR VALUES TO MAKE THIS WORK
+		if (ent->client->pers.rpgArmorValues[0] > 0) {
+			if (ent->client->pers.rpgInventory[i] == 7) {
+				strcat(rows[i], equipTag);
+			}
+		}
+		if (ent->client->pers.rpgArmorValues[1] > 0) {
+			if (ent->client->pers.rpgInventory[i] == 6) {
+				strcat(rows[i], equipTag);
+			}
+		}
+		if (ent->client->pers.rpgArmorValues[2] > 0) {
+			if (ent->client->pers.rpgInventory[i] == 8) {
+				strcat(rows[i], equipTag);
+			}
+		}
 	}
 	
 

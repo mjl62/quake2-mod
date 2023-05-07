@@ -921,7 +921,7 @@ char* GetRPGItemName(edict_t* ent, int item) {
 		return "Fatigue Potion";
 	}
 	if (item == RPGITEM_LEVITATEPOT) {
-		return "Levitation Potion";
+		return "Jump Potion";
 	}
 	if (item == RPGITEM_FORTIFYPOT) {
 		return "Resistance Potion";
@@ -961,7 +961,7 @@ void UseRPGItem(edict_t* ent, int item) {
 	}
 	else if (item == RPGITEM_FORTIFYPOT) {
 		gi.bprintf(PRINT_HIGH, "Used Fortify Potion\n");
-		inflictStatus(ent, ent, STATUS_FORTIFY_RESISTANCE, 20, 1);
+		inflictStatus(ent, ent, STATUS_FORTIFY_RESISTANCE, 30, 20);
 	}
 	else if (item == RPGITEM_HEADARMOR) {
 		EquipArmor(ent, 0, 5, BONUSSTAT_MAGICKA_COST);
@@ -2057,8 +2057,6 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 	}
 
 	tickStatusEffects(ent);
-
-
 }
 
 

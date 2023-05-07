@@ -502,9 +502,10 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			resistance += client->pers.rpgArmorValues[0] / 100.0;
 			resistance += client->pers.rpgArmorValues[1] / 100.0;
 			resistance += client->pers.rpgArmorValues[2] / 100.0;
+			resistance += targ->fortResStrength / 100.0;
 
 			char* res[4];
-			itoa(resistance, res, 10);
+			itoa(resistance * 100, res, 10);
 
 			gi.bprintf(PRINT_HIGH, res);
 
@@ -515,11 +516,6 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			gi.bprintf(PRINT_HIGH, " -> ");
 			take = take - (take * resistance);
 
-			itoa(take, res, 10);
-
-			gi.bprintf(PRINT_HIGH, res);
-
-			gi.bprintf(PRINT_HIGH, "\n");
 			if (take == 0) {
 				int coinflip;
 				coinflip = (crandom() * 100.0);
@@ -530,6 +526,13 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 					take = 1;
 				}
 			}
+
+			itoa(take, res, 10);
+
+			gi.bprintf(PRINT_HIGH, res);
+
+			gi.bprintf(PRINT_HIGH, "\n");
+			
 		}
 		
 		targ->health = targ->health - take;
@@ -557,6 +560,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 			return;
 		}
 		// Poison (732 is the code meaning its a poison tick doing damage, so we dont want to inflict poison again)
+		// Checks classname player which i guess helps it not crash? idk this shits been random, may still break.
 		if (mod == MOD_HYPERBLASTER && dflags != 732 && strcmp(inflictor->classname, "player")) {
 			int damageMod = GetLevelOf(attacker, SKILL_INTELLIGENCE)/2; // For every 2 levels poison does 1 more damage
 			inflictStatus(targ, attacker, STATUS_POISON, 6, 4 + damageMod);

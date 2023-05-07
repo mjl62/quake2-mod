@@ -172,35 +172,35 @@ quest getQuest(int questNum) {
 		q.questNum = 3;
 		q.queststarted = true;
 		q.questcompleted = false;
-		strcpy(q.questname, "QuestName");
-		strcpy(q.questdesc, "Desc");
-		strcpy(q.introdiag, "IntroDialogue\n");
-		strcpy(q.inprogressdiag, "InProgressDialogue\n");
-		strcpy(q.completediag, "Complete Dialogue\n");
-		strcpy(q.postdiag, "PostDialogue\n");
-		strcpy(q.killclassname, "none");
+		strcpy(q.questname, "Big and Ugly");
+		strcpy(q.questdesc, "Kill 3 Soldiers");
+		strcpy(q.introdiag, "Wanna kill 3 of those big uglies for a fortify potion?\n");
+		strcpy(q.inprogressdiag, "What'd they do? Nothing, who cares?\n");
+		strcpy(q.completediag, "You know those guys had families? Eh, you don't care...\n");
+		strcpy(q.postdiag, "Watch your back, pal.\n");
+		strcpy(q.killclassname, "monster_soldier");
 		q.kills = 0;
 		q.killsneeded = 1;
 		q.rewardXP = 50;
-		q.rewardItem = NULL;
-		q.rewardQuantity = 0;
+		q.rewardItem = RPGITEM_FORTIFYPOT;
+		q.rewardQuantity = 2;
 	}
 	else if (questNum == 4) {
 		q.questNum = 4;
 		q.queststarted = true;
 		q.questcompleted = false;
-		strcpy(q.questname, "QuestName");
-		strcpy(q.questdesc, "Desc");
-		strcpy(q.introdiag, "IntroDialogue\n");
-		strcpy(q.inprogressdiag, "InProgressDialogue\n");
-		strcpy(q.completediag, "Complete Dialogue\n");
-		strcpy(q.postdiag, "PostDialogue\n");
+		strcpy(q.questname, "Medic!!!");
+		strcpy(q.questdesc, "Find the man a health potion");
+		strcpy(q.introdiag, "Hey, can you spare a healing potion, I'm hurt pretty bad...\n");
+		strcpy(q.inprogressdiag, "*cough cough*\n");
+		strcpy(q.completediag, "You're my hero, stranger.\n");
+		strcpy(q.postdiag, "I wish I could offer you more, but I hope that's enough.\n");
 		strcpy(q.killclassname, "none");
 		q.kills = 0;
 		q.killsneeded = 1;
 		q.rewardXP = 50;
-		q.rewardItem = NULL;
-		q.rewardQuantity = 0;
+		q.rewardItem = RPGITEM_LEVITATEPOT;
+		q.rewardQuantity = 2;
 	}
 	return q;
 }

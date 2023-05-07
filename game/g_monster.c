@@ -517,15 +517,23 @@ void tickStatusEffects(edict_t* self) {
 
 		if (self->levitateTicks > 0) {
 			self->levitateTicks -= 1;
-			self->movetype = MOVETYPE_NOCLIP;
-			if (self->levitateTicks < 1) {
-				self->movetype = MOVETYPE_WALK;
-			}
+			gi.AddCommandString("sv_gravity 450");
 		}
+		else {
+			gi.AddCommandString("sv_gravity 850");
+		}
+
+		// When it runs out we set strength to 0 so it doesnt apply when checked, but for duration it will remain its strength.
+		if (self->fortResTicks > 0) {
+			self->fortResTicks -= 1;
+		}
+		else {
+			self->fortResStrength = 0;
+		}
+
 
 		self->nextStatusTickTime = level.time + 1;
 	}
-
 
 	
 	

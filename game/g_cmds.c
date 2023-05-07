@@ -930,6 +930,14 @@ void Cmd_SpawnQuests_f(edict_t* ent) {
 		vec3_t a5 = { 0, -94, 0 };
 		SP_MailRecipient(ent, o5, a5, 2);
 	}
+	else if (Q_stricmp(level.mapname, "base2") == 0) {
+		vec3_t o6 = { 24, 2410, -145 };
+		vec3_t a6 = { 0, 0, 0 };
+		SP_QuestGiver(ent, o6, a6, 3);
+		vec3_t o7 = { -40, 1978, 46 };
+		vec3_t a7 = { 0, 90, 0 };
+		SP_QuestGiver(ent, o7, a7, 4);
+	}
 
 }
 

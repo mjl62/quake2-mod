@@ -2062,17 +2062,14 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		gi.cvar_forceset("cl_sidespeed", "400");
 		gi.cvar_forceset("cl_rollspeed", "400");
 	}
-	else {
+	else if (level.time > 4) {
 		gi.cvar_forceset("sv_maxspeed", "320");
 		gi.cvar_forceset("cl_forwardspeed", "200");
 		gi.cvar_forceset("cl_backspeed", "200");
 		gi.cvar_forceset("cl_sidespeed", "200");
 		gi.cvar_forceset("cl_rollspeed", "200");
 	}
-
-	
-
-	
+		
 	tickStatusEffects(ent);
 }
 

@@ -518,10 +518,13 @@ void tickStatusEffects(edict_t* self) {
 		if (self->levitateTicks > 0) {
 			self->levitateTicks -= 1;
 			gi.AddCommandString("sv_gravity 450");
+			
+			if (self->levitateTicks < 1) {
+				gi.AddCommandString("sv_gravity 850");
+			}
 		}
-		else {
-			gi.AddCommandString("sv_gravity 850");
-		}
+		
+		
 
 		// When it runs out we set strength to 0 so it doesnt apply when checked, but for duration it will remain its strength.
 		if (self->fortResTicks > 0) {

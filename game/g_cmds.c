@@ -930,6 +930,7 @@ void Cmd_SpawnQuests_f(edict_t* ent) {
 		vec3_t a5 = { 0, -94, 0 };
 		SP_MailRecipient(ent, o5, a5, 2);
 	}
+
 	else if (Q_stricmp(level.mapname, "base2") == 0) {
 		vec3_t o6 = { 24, 2410, -145 };
 		vec3_t a6 = { 0, 0, 0 };
@@ -1122,13 +1123,6 @@ void Cmd_ApplyStatPoint_f(edict_t* ent, char* statname) {
 	}
 }
 
-void Cmd_RPGSprint_f(edict_t* ent) {
-	if (ent->client->pers.fatigue >= 0) {
-		ent->client->pers.fatigue -= 1;
-	}
-}
-
-
 void Cmd_RPGInventoryScreen_f(edict_t* ent) {
 	Cmd_ShowRPGInventory_f(ent);
 }
@@ -1274,9 +1268,6 @@ void ClientCommand (edict_t *ent)
 	}
 	else if (Q_stricmp(cmd, "applypoints") == 0) {
 		Cmd_ApplyStatPoint_f(ent, gi.argv(1));
-	}
-	else if (Q_stricmp(cmd, "rpgsprint") == 0) {
-		Cmd_RPGSprint_f(ent);
 	}
 	// End Custom Commands
 	else	// anything that doesn't match a command will be a chat

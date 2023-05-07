@@ -664,11 +664,6 @@ qboolean CanDamage (edict_t *targ, edict_t *inflictor);
 void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir, vec3_t point, vec3_t normal, int damage, int knockback, int dflags, int mod);
 void T_RadiusDamage(edict_t* inflictor, edict_t* attacker, float damage, edict_t* ignore, float radius, int mod);
 
-//
-// g_func.c
-//
-void door_go_up(edict_t* self, edict_t* activator);
-
 
 // damage flags
 #define DAMAGE_RADIUS			0x00000001	// damage was indirect
@@ -973,8 +968,6 @@ typedef struct
 	int			bonusStats[3];
 
 	int			rpgCursorLocation;
-
-	qboolean	isSprinting;
 
 } client_persistant_t;
 

@@ -853,6 +853,17 @@ void SetWeaponSkill(edict_t* ent, int skill, float newlevel) {
 
 void AddRPGItem(edict_t* ent, int item) {
 	qboolean foundslot = false;
+	if (item == 99) {
+		AddRPGItem(ent, 1);
+		AddRPGItem(ent, 2);
+		AddRPGItem(ent, 3);
+		AddRPGItem(ent, 4);
+		AddRPGItem(ent, 5);
+		AddRPGItem(ent, 6);
+		AddRPGItem(ent, 7);
+		AddRPGItem(ent, 8);
+		return;
+	}
 	for (int i = 0; i < 16; i++) {
 		if (ent->client->pers.rpgInventory[i] == NULL) {
 			ent->client->pers.rpgInventory[i] = item;
@@ -868,6 +879,12 @@ void AddRPGItem(edict_t* ent, int item) {
 
 void RemoveRPGItem(edict_t* ent, int item) {
 	qboolean founditem = false;
+	if (item == 99) {
+		for (int i = 0; i < 16; i++) {
+			ent->client->pers.rpgInventory[i] = NULL;
+		}
+		return;
+	}
 	for (int i = 0; i < 16; i++) {
 		if (ent->client->pers.rpgInventory[i] == item) {
 			ent->client->pers.rpgInventory[i] = NULL;
@@ -930,10 +947,41 @@ char* GetRPGItemName(edict_t* ent, int item) {
 		return "Iron Chestplate";
 	}
 	if (item == RPGITEM_HEADARMOR) {
-		return "Iron Helmet";
+		return "Cloth Hood";
 	}
 	if (item == RPGITEM_LEGARMOR) {
 		return "Leather Boots";
+	}
+	return "ERR";
+}
+
+char* GetRPGItemDesc(edict_t* ent, int item) {
+	if (item == NULL) {
+		return "";
+	}
+	if (item == RPGITEM_HEALTHPOT) {
+		return "+10 Health Per Second for 8 Seconds";
+	}
+	if (item == RPGITEM_MAGICKAPOT) {
+		return "+10 Magicka Per Second for 8 Seconds";
+	}
+	if (item == RPGITEM_FATIGUEPOT) {
+		return "+10 Fatigue Per Second for 8 Seconds";
+	}
+	if (item == RPGITEM_LEVITATEPOT) {
+		return "Higher jump height for 20 seconds";
+	}
+	if (item == RPGITEM_FORTIFYPOT) {
+		return "+20 Damage Resistance for 30 seconds";
+	}
+	if (item == RPGITEM_CHESTARMOR) {
+		return "+10 Armor for your chest. Enchantment: +5 Fatigue Per Second";
+	}
+	if (item == RPGITEM_HEADARMOR) {
+		return "+5 Armor for your head. Enchantment: 50% Reduced Mana Cost";
+	}
+	if (item == RPGITEM_LEGARMOR) {
+		return "+5 Armor for your legs. Enchantment: Increased Movement Speed";
 	}
 	return "ERR";
 }

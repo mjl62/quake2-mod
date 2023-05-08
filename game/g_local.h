@@ -799,6 +799,7 @@ void AddRPGItem(edict_t* ent, int item);
 void RemoveRPGItem(edict_t* ent, int item);
 void GetRPGInventory(edict_t* ent);
 char* GetRPGItemName(edict_t* ent, int item);
+char* GetRPGItemDesc(edict_t* ent, int item);
 void EquipArmor(edict_t* ent, int slot, int rating, int bonus);
 
 

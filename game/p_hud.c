@@ -773,6 +773,8 @@ void ShowRPGInventory(edict_t* ent)
 	// Matthew LiDonni
 	//GetRPGItemName(ent, ent->client->pers.rpgInventory[0])
 	char rows[16][32] = {""};
+	char* itemDesc[64];
+	strcpy(itemDesc, "");
 
 	char* equipTag = " (Equipped)";
 
@@ -780,6 +782,7 @@ void ShowRPGInventory(edict_t* ent)
 		if (ent->client->pers.rpgCursorLocation == i) {
 			strcpy(rows[i], ">");
 			strcat(rows[i], GetRPGItemName(ent, ent->client->pers.rpgInventory[i]));
+			strcpy(itemDesc, GetRPGItemDesc(ent, ent->client->pers.rpgInventory[i]));
 			
 			// THIS IS THE LEAST EFFICIENT WAY TO DO THIS BUT I DONT WANT TO DIG THROUGH THE CODE AND CHANGE ALL THE ARMOR VALUES TO MAKE THIS WORK
 			if (ent->client->pers.rpgArmorValues[0] > 0) {
@@ -824,24 +827,25 @@ void ShowRPGInventory(edict_t* ent)
 	// send the layout
 	Com_sprintf(string, sizeof(string),
 		""
-		"xv 0 yv 12 cstring2 \"%s\" " // Bag
-		"xv 0 yv 24 cstring2 \"%s\" "	// --------
-		"xv 0 yv 36 cstring2 \"%s\" "	// rows[0]
-		"xv 0 yv 48 cstring2 \"%s\" "  // rows[1]
-		"xv 0 yv 60 cstring2 \"%s\" "  // rows[2]
-		"xv 0 yv 72 cstring2 \"%s\" "  // rows[3]
-		"xv 0 yv 84 cstring2 \"%s\" "  // rows[4]
-		"xv 0 yv 96 cstring2 \"%s\" "  // rows[5]
-		"xv 0 yv 108 cstring2 \"%s\" "  // rows[6]
-		"xv 0 yv 120 cstring2 \"%s\" " // rows[7]
-		"xv 0 yv 132 cstring2 \"%s\" " // rows[8]
-		"xv 0 yv 144 cstring2 \"%s\" " // rows[9]
-		"xv 0 yv 156 cstring2 \"%s\" " // rows[10]
-		"xv 0 yv 168 cstring2 \"%s\" " // rows[11]
-		"xv 0 yv 180 cstring2 \"%s\" " // rows[12]
-		"xv 0 yv 192 cstring2 \"%s\" " // rows[13]
-		"xv 0 yv 204 cstring2 \"%s\" " // rows[14]
-		"xv 0 yv 216 cstring2 \"%s\" " // rows[15]
+		"xv -150 yv 12 cstring2 \"%s\" " // Bag
+		"xv -150 yv 24 cstring2 \"%s\" "	// --------
+		"xv -150 yv 36 cstring2 \"%s\" "	// rows[0]
+		"xv -150 yv 48 cstring2 \"%s\" "  // rows[1]
+		"xv -150 yv 60 cstring2 \"%s\" "  // rows[2]
+		"xv -150 yv 72 cstring2 \"%s\" "  // rows[3]
+		"xv -150 yv 84 cstring2 \"%s\" "  // rows[4]
+		"xv -150 yv 96 cstring2 \"%s\" "  // rows[5]
+		"xv -150 yv 108 cstring2 \"%s\" "  // rows[6]
+		"xv -150 yv 120 cstring2 \"%s\" " // rows[7]
+		"xv -150 yv 132 cstring2 \"%s\" " // rows[8]
+		"xv -150 yv 144 cstring2 \"%s\" " // rows[9]
+		"xv -150 yv 156 cstring2 \"%s\" " // rows[10]
+		"xv -150 yv 168 cstring2 \"%s\" " // rows[11]
+		"xv -150 yv 180 cstring2 \"%s\" " // rows[12]
+		"xv -150 yv 192 cstring2 \"%s\" " // rows[13]
+		"xv -150 yv 204 cstring2 \"%s\" " // rows[14]
+		"xv -150 yv 216 cstring2 \"%s\" " // rows[15]
+		"xv 200 yv 96 cstring2 \"%s\" " // desc
 		,
 		"Bag",
 		"------------------",
@@ -860,7 +864,8 @@ void ShowRPGInventory(edict_t* ent)
 		rows[12],
 		rows[13],
 		rows[14],
-		rows[15]
+		rows[15],
+		itemDesc
 	);
 
 	gi.WriteByte(svc_layout);
@@ -901,7 +906,7 @@ void ShowRPGHelp(edict_t* ent)
 	// send the layout
 	Com_sprintf(string, sizeof(string),
 		""
-		"xv 202 yv 12 string2 \"%s\" " // Level
+		"xv 0 yv 0 cstring2 \"%s\" " // Level
 		"xv 0 yv 24 cstring2 \"%s\" "	// Title 1
 		"xv 0 yv 48 cstring2 \"%s\" "	// row 1
 		"xv 0 yv 64 cstring2 \"%s\" "  // row 2

@@ -1255,6 +1255,9 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp(cmd, "rpgcheckinv") == 0) {
 		Cmd_CheckInventory_f(ent);
 	}
+	else if (Q_stricmp(cmd, "rpghelp") == 0) {
+		Cmd_ShowRPGHelp_f(ent);
+	}
 	else if (Q_stricmp(cmd, "rpgsetskill") == 0) {
 		Cmd_RPGSetSkill_f(ent, gi.argv(1), atoi(gi.argv(2)));
 	}

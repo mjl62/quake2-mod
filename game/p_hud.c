@@ -893,6 +893,67 @@ void Cmd_ShowRPGInventory_f(edict_t* ent)
 	ShowRPGInventory(ent);
 }
 
+// A helpmenu to show RPG stats
+void ShowRPGHelp(edict_t* ent)
+{
+	char	string[2048]; // was 1024
+
+	// send the layout
+	Com_sprintf(string, sizeof(string),
+		""
+		"xv 202 yv 12 string2 \"%s\" " // Level
+		"xv 0 yv 24 cstring2 \"%s\" "	// Title 1
+		"xv 0 yv 48 cstring2 \"%s\" "	// row 1
+		"xv 0 yv 64 cstring2 \"%s\" "  // row 2
+		"xv 0 yv 80 cstring2 \"%s\" "  // row 3
+		"xv 0 yv 112 cstring2 \"%s\" "  // Title 2
+		"xv 0 yv 144 cstring2 \"%s\" "  // row 4
+		"xv 0 yv 160 cstring2 \"%s\" "  // row 5
+		"xv 0 yv 176 cstring2 \"%s\" "  // row 6
+		"xv 0 yv 196 cstring2 \"%s\" " // row 7
+		,
+		"Help:",
+		"Controls: F1: Help   I: Inventory   Up/DownArrow: Navigate Inventory   RightArrow: Use Inventory Item",
+		"J: Journal   K: Skills   L: Spend Skill Points   F: Sheathe/Draw Weapon   Click (While Sheathed): Interact",
+		"You are an adventurer starting from nothing.",
+		"Stats are core attributes and are a large part of your build. Skills affect certain weapon classes.",
+		"Stats can be upgraded with points but to gain skill with a weapon you must use it in battle.",
+		"When sheathed, you can interact with strangers to speak with them, some have",
+		"quests that reward experience and items! Check your journal to see your current quests.",
+		"In combat, you may not land hits, and you might suck. But practice makes perfect. Good Luck.",
+		""
+	);
+
+	gi.WriteByte(svc_layout);
+	gi.WriteString(string);
+	gi.unicast(ent, true);
+}
+
+void Cmd_ShowRPGHelp_f(edict_t* ent)
+{
+	// this is for backwards compatability
+	if (deathmatch->value)
+	{
+		Cmd_Score_f(ent);
+		return;
+	}
+
+	ent->client->showinventory = false;
+	ent->client->showscores = false;
+
+	// TODO set up my own show command like this
+	if (ent->client->showhelp && (ent->client->pers.game_helpchanged == game.helpchanged))
+	{
+		ent->client->showhelp = false;
+		return;
+	}
+
+	ent->client->showhelp = true;
+	ent->client->pers.helpchanged = 0;
+	ent->client->showapplystat = false;
+	ShowRPGHelp(ent);
+}
+
 
 //=======================================================================
 

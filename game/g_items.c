@@ -613,6 +613,9 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 	float			salvage;
 	int				salvagecount;
 
+	AddRPGItem(other, RPGITEM_CHESTARMOR);
+
+	/*
 	// get info on new armor
 	newinfo = (gitem_armor_t *)ent->item->info;
 
@@ -679,7 +682,7 @@ qboolean Pickup_Armor (edict_t *ent, edict_t *other)
 
 	if (!(ent->spawnflags & DROPPED_ITEM) && (deathmatch->value))
 		SetRespawn (ent, 20);
-
+		*/
 	return true;
 }
 
@@ -728,6 +731,9 @@ qboolean Pickup_PowerArmor (edict_t *ent, edict_t *other)
 {
 	int		quantity;
 
+	AddRPGItem(other, RPGITEM_CHESTARMOR);
+
+	/*
 	quantity = other->client->pers.inventory[ITEM_INDEX(ent->item)];
 
 	other->client->pers.inventory[ITEM_INDEX(ent->item)]++;
@@ -741,6 +747,7 @@ qboolean Pickup_PowerArmor (edict_t *ent, edict_t *other)
 			ent->item->use (other, ent->item);
 	}
 
+	*/
 	return true;
 }
 

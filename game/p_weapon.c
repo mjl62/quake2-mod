@@ -421,6 +421,19 @@ void Interact(edict_t* ent, vec3_t start, vec3_t aimdir) {
 				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].completediag);
 				ent->client->pers.questlog[Interact.ent->questNum].questcompleted = true;
 			}
+			else if (Interact.ent->questNum == 4) {
+				int j;
+				for (j = 0; j < 16; j++) {
+					if (ent->client->pers.rpgInventory[j] == 1) {
+						ent->client->pers.questlog[4].kills = 1;
+						RemoveRPGItem(ent, 1);
+						break;
+					}
+				}			
+				if (j == 16) {
+					gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].inprogressdiag);
+				}
+			}
 			else {
 				gi.bprintf(PRINT_CHAT, ent->client->pers.questlog[Interact.ent->questNum].inprogressdiag);
 			}

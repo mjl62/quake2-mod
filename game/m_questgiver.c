@@ -165,7 +165,7 @@ quest getQuest(int questNum) {
 		q.kills = 0;
 		q.killsneeded = 1;
 		q.rewardXP = 25;
-		q.rewardItem = RPGITEM_CHESTARMOR;
+		q.rewardItem = RPGITEM_HEADARMOR;
 		q.rewardQuantity = 1;
 	}
 	else if (questNum == 3) {

@@ -608,6 +608,7 @@ void Cmd_Score_f (edict_t *ent);
 void Cmd_ShowRPGStat_f(edict_t* ent);
 void Cmd_ShowApplyStats_f(edict_t* ent);
 void Cmd_ShowRPGInventory_f(edict_t* ent);
+void Cmd_ShowRPGHelp_f(edict_t* ent);
 
 
 //

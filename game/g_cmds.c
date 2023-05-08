@@ -932,7 +932,7 @@ void Cmd_SpawnQuests_f(edict_t* ent) {
 	}
 
 	else if (Q_stricmp(level.mapname, "base2") == 0) {
-		vec3_t o6 = { 24, 2410, -145 };
+		vec3_t o6 = { 224, 2464, -209 };
 		vec3_t a6 = { 0, 0, 0 };
 		SP_QuestGiver(ent, o6, a6, 3);
 		vec3_t o7 = { -40, 1978, 46 };
@@ -1093,24 +1093,31 @@ void Cmd_ApplyStatPoint_f(edict_t* ent, char* statname) {
 		if (Q_stricmp(statname, "strength") == 0) {
 			ent->client->pers.stat_strength++;
 			ent->client->pers.max_fatigue += 4;
+			ent->client->pers.fatigue += 4;
 		}
 		else if (Q_stricmp(statname, "intelligence") == 0) {
 			ent->client->pers.stat_intelligence++;
 			ent->client->pers.max_magicka += 10;
+			ent->client->pers.magicka += 10;
 		}
 		else if (Q_stricmp(statname, "willpower") == 0) {
 			ent->client->pers.stat_willpower++;
 			ent->client->pers.max_fatigue += 5;
+			ent->client->pers.fatigue += 5;
 		}
 		else if (Q_stricmp(statname, "agility") == 0) {
 			ent->client->pers.stat_agility++;
 			ent->client->pers.max_fatigue += 8;
+			ent->client->pers.fatigue += 8;
 		}
 		else if (Q_stricmp(statname, "endurance") == 0) {
 			ent->client->pers.stat_endurance++;
+			ent->health += 10;
 			ent->max_health += 10;
 			ent->client->pers.max_health += 10;
+			ent->client->pers.health += 10;
 			ent->client->pers.max_fatigue += 5;
+			ent->client->pers.fatigue += 5;
 		}
 		else {
 			gi.bprintf(PRINT_HIGH, "ERROR: Tried to apply stat point to non-existent stat. No points spent.");

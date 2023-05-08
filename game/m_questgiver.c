@@ -173,14 +173,14 @@ quest getQuest(int questNum) {
 		q.queststarted = true;
 		q.questcompleted = false;
 		strcpy(q.questname, "Big and Ugly");
-		strcpy(q.questdesc, "Kill 3 Soldiers");
+		strcpy(q.questdesc, "Kill 3 Infantry");
 		strcpy(q.introdiag, "Wanna kill 3 of those big uglies for a fortify potion?\n");
 		strcpy(q.inprogressdiag, "What'd they do? Nothing, who cares?\n");
 		strcpy(q.completediag, "You know those guys had families? Eh, you don't care...\n");
 		strcpy(q.postdiag, "Watch your back, pal.\n");
-		strcpy(q.killclassname, "monster_soldier");
+		strcpy(q.killclassname, "monster_infantry");
 		q.kills = 0;
-		q.killsneeded = 1;
+		q.killsneeded = 3;
 		q.rewardXP = 50;
 		q.rewardItem = RPGITEM_FORTIFYPOT;
 		q.rewardQuantity = 2;

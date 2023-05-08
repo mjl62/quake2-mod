@@ -549,6 +549,9 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				if (strcmp(attacker->client->pers.questlog[0].killclassname, targ->classname) == 0) {
 					attacker->client->pers.questlog[0].kills++;
 				}
+				if (strcmp(attacker->client->pers.questlog[3].killclassname, targ->classname) == 0) {
+					attacker->client->pers.questlog[3].kills++;
+				}
 				char classname_slice[10];
 				strncpy(classname_slice, targ->classname, 7);
 				// It aint broke, don't fix
